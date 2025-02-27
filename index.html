@@ -1,0 +1,3592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NexusAI - Advanced AGI System</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.8.0/flowbite.min.css" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.8.0/flowbite.min.js"></script>
+  <style>
+    :root {
+      --primary-color: #5D5CDE;
+      --terminal-bg: rgba(0, 0, 0, 0.85);
+      --terminal-text: #00ff00;
+      --console-bg: #0a0a0a;
+      --file-bg: #1a1a1a;
+      --folder-color: #ffd700;
+      --file-color: #ffffff;
+      --exe-color: #00ff00;
+      --text-file-color: #4da6ff;
+      --sys-file-color: #ff5f5c;
+      --data-file-color: #ff9e64;
+    }
+
+    .dark {
+      --terminal-bg: rgba(0, 0, 0, 0.95);
+      --console-bg: #050505;
+      --file-bg: #111111;
+    }
+
+    body {
+      min-height: 100vh;
+      transition: background-color 0.3s ease;
+    }
+
+    .terminal {
+      font-family: 'Courier New', monospace;
+      background-color: var(--terminal-bg);
+      color: var(--terminal-text);
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .terminal-header {
+      background-color: #333;
+      padding: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .terminal-dots {
+      display: flex;
+      gap: 6px;
+    }
+
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+
+    .red { background-color: #ff5f56; }
+    .yellow { background-color: #ffbd2e; }
+    .green { background-color: #27c93f; }
+
+    .terminal-title {
+      color: #eee;
+      font-size: 14px;
+    }
+
+    .terminal-body {
+      padding: 15px;
+      height: 400px;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: #666 var(--terminal-bg);
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .terminal-body::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .terminal-body::-webkit-scrollbar-track {
+      background: var(--terminal-bg);
+    }
+
+    .terminal-body::-webkit-scrollbar-thumb {
+      background-color: #666;
+      border-radius: 3px;
+    }
+
+    .terminal-input-wrapper {
+      display: flex;
+      padding: 10px 15px;
+      background-color: var(--console-bg);
+      border-top: 1px solid #333;
+    }
+
+    .prompt {
+      color: #0f0;
+      margin-right: 8px;
+      font-weight: bold;
+    }
+
+    .terminal-input {
+      background: transparent;
+      border: none;
+      color: #fff;
+      font-family: 'Courier New', monospace;
+      flex-grow: 1;
+      caret-color: #fff;
+      font-size: 16px;
+    }
+
+    .terminal-input:focus {
+      outline: none;
+    }
+
+    .log-entry {
+      margin-bottom: 8px;
+      line-height: 1.5;
+    }
+
+    .log-info { color: #0f0; }
+    .log-system { color: #5D5CDE; }
+    .log-error { color: #ff5f56; }
+    .log-warning { color: #ffbd2e; }
+    .log-user { color: #fff; }
+    .log-ai { color: #2bc4e9; }
+    .log-process { color: #a0a0a0; }
+    .log-success { color: #27c93f; }
+    .log-ml { color: #e066ff; }
+    .log-fs { color: #ffd700; }
+
+    .system-message {
+      color: #888;
+      font-style: italic;
+    }
+
+    .avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background-color: var(--primary-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      margin-right: 10px;
+    }
+
+    .ai-avatar {
+      background: linear-gradient(135deg, #5D5CDE, #7e57c2);
+    }
+
+    .user-avatar {
+      background: linear-gradient(135deg, #2196f3, #00bcd4);
+    }
+
+    .typing-indicator {
+      display: inline-block;
+    }
+
+    .typing-indicator span {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: #2bc4e9;
+      margin-right: 3px;
+      animation: pulse 1.5s infinite ease-in-out;
+    }
+
+    .typing-indicator span:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .typing-indicator span:nth-child(3) {
+      animation-delay: 0.4s;
+      margin-right: 0;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(0.7); opacity: 0.5; }
+      50% { transform: scale(1); opacity: 1; }
+    }
+
+    .blink {
+      animation: blink-animation 1s steps(5, start) infinite;
+    }
+
+    @keyframes blink-animation {
+      to { visibility: hidden; }
+    }
+
+    .chat-message {
+      display: flex;
+      margin-bottom: 15px;
+      align-items: flex-start;
+    }
+
+    .message-content {
+      background-color: rgba(30, 30, 30, 0.6);
+      padding: 10px 12px;
+      border-radius: 8px;
+      max-width: 85%;
+    }
+
+    .user-message .message-content {
+      background-color: rgba(93, 92, 222, 0.3);
+    }
+
+    .context-panel {
+      background-color: rgba(30, 30, 30, 0.6);
+      color: #aaa;
+      border-radius: 8px;
+      overflow: hidden;
+      transition: height 0.3s ease;
+    }
+
+    .context-header {
+      background-color: #333;
+      padding: 10px 15px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .context-body {
+      padding: 15px;
+      font-size: 14px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .status-bar {
+      background-color: rgba(20, 20, 20, 0.8);
+      color: #aaa;
+      font-size: 11px;
+      padding: 5px 10px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .status-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .file-explorer {
+      background-color: var(--file-bg);
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .file-explorer-header {
+      background-color: #222;
+      color: #fff;
+      padding: 10px 15px;
+      font-weight: bold;
+      border-bottom: 1px solid #333;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .file-explorer-body {
+      padding: 10px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .file-item {
+      padding: 5px 10px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      margin-bottom: 3px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .file-item:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .file-icon {
+      margin-right: 8px;
+      width: 16px;
+      text-align: center;
+    }
+
+    .file-name {
+      flex-grow: 1;
+    }
+
+    .file-meta {
+      font-size: 0.8em;
+      color: #888;
+    }
+
+    .folder { color: var(--folder-color); }
+    .file { color: var(--file-color); }
+    .executable { color: var(--exe-color); }
+    .text-file { color: var(--text-file-color); }
+    .system-file { color: var(--sys-file-color); }
+    .data-file { color: var(--data-file-color); }
+
+    .breadcrumb {
+      display: flex;
+      background: #222;
+      padding: 5px 10px;
+      font-size: 0.9em;
+      overflow-x: auto;
+      white-space: nowrap;
+      border-bottom: 1px solid #333;
+    }
+
+    .breadcrumb span {
+      color: #888;
+    }
+
+    .breadcrumb a {
+      color: #ccc;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .breadcrumb a:hover {
+      text-decoration: underline;
+    }
+
+    .file-content {
+      background: #111;
+      color: #eee;
+      padding: 10px;
+      font-family: 'Courier New', monospace;
+      border-radius: 4px;
+      white-space: pre-wrap;
+      max-height: 200px;
+      overflow-y: auto;
+      font-size: 14px;
+      line-height: 1.4;
+      margin-top: 10px;
+      border: 1px solid #333;
+    }
+
+    .process-manager {
+      margin-top: 10px;
+      background-color: var(--file-bg);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .process-header {
+      background-color: #222;
+      color: #fff;
+      padding: 10px 15px;
+      font-weight: bold;
+      border-bottom: 1px solid #333;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .process-body {
+      padding: 10px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .process-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9em;
+    }
+
+    .process-table th {
+      background-color: #1a1a1a;
+      color: #ccc;
+      text-align: left;
+      padding: 8px;
+      font-weight: normal;
+    }
+
+    .process-table td {
+      padding: 8px;
+      border-top: 1px solid #333;
+    }
+
+    .process-running {
+      color: #27c93f;
+    }
+
+    .process-suspended {
+      color: #ffbd2e;
+    }
+
+    .process-critical {
+      color: #ff5f56;
+    }
+
+    .process-progress {
+      width: 100%;
+      background-color: #333;
+      border-radius: 10px;
+      height: 6px;
+      overflow: hidden;
+    }
+
+    .process-progress-bar {
+      height: 100%;
+      background-color: var(--primary-color);
+    }
+
+    @keyframes progress-animation {
+      0% { width: 0%; }
+      100% { width: 100%; }
+    }
+
+    .progress-animated {
+      animation: progress-animation 2s linear infinite;
+      animation-direction: alternate;
+    }
+
+    .ml-section {
+      background-color: var(--file-bg);
+      border-radius: 8px;
+      overflow: hidden;
+      margin-top: 20px;
+    }
+
+    .ml-header {
+      background-color: #222;
+      color: #fff;
+      padding: 10px 15px;
+      font-weight: bold;
+      border-bottom: 1px solid #333;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .ml-body {
+      padding: 15px;
+    }
+
+    .training-progress {
+      margin-top: 10px;
+      background-color: #333;
+      border-radius: 10px;
+      height: 15px;
+      overflow: hidden;
+      margin-bottom: 15px;
+    }
+
+    .training-progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #5D5CDE, #7e57c2);
+      transition: width 0.3s ease;
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .metric-card {
+      background-color: rgba(50, 50, 50, 0.5);
+      padding: 10px;
+      border-radius: 5px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .metric-name {
+      font-size: 0.8em;
+      color: #aaa;
+      margin-bottom: 5px;
+    }
+
+    .metric-value {
+      font-size: 1.2em;
+      color: #fff;
+      font-weight: bold;
+    }
+
+    .model-selector {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+
+    .model-option {
+      background-color: rgba(50, 50, 50, 0.5);
+      padding: 8px 12px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      font-size: 0.9em;
+    }
+
+    .model-option:hover {
+      background-color: rgba(93, 92, 222, 0.3);
+    }
+
+    .model-option.active {
+      background-color: rgba(93, 92, 222, 0.5);
+      border: 1px solid var(--primary-color);
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 100;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      overflow: auto;
+    }
+
+    .modal-content {
+      background-color: #222;
+      color: #eee;
+      margin: 15% auto;
+      padding: 20px;
+      border-radius: 8px;
+      max-width: 500px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .close-modal {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .close-modal:hover {
+      color: white;
+    }
+
+    .file-editor {
+      display: none;
+      margin-top: 10px;
+    }
+
+    .file-editor-header {
+      background-color: #333;
+      padding: 8px 15px;
+      display: flex;
+      justify-content: space-between;
+      border-top-left-radius: 8px;
+      border-top-right-radius: 8px;
+    }
+
+    .file-editor-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .file-editor-body {
+      background-color: #1a1a1a;
+      border: 1px solid #333;
+      border-bottom-left-radius: 8px;
+      border-bottom-right-radius: 8px;
+      padding: 10px;
+    }
+
+    .editor-textarea {
+      width: 100%;
+      min-height: 150px;
+      background-color: #111;
+      color: #eee;
+      border: 1px solid #444;
+      border-radius: 4px;
+      padding: 10px;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      resize: vertical;
+    }
+
+    .editor-textarea:focus {
+      outline: none;
+      border-color: var(--primary-color);
+    }
+
+    .network-section {
+      background-color: var(--file-bg);
+      border-radius: 8px;
+      overflow: hidden;
+      margin-top: 20px;
+    }
+
+    .network-header {
+      background-color: #222;
+      color: #fff;
+      padding: 10px 15px;
+      font-weight: bold;
+      border-bottom: 1px solid #333;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .network-body {
+      padding: 15px;
+    }
+
+    .network-graph {
+      height: 100px;
+      background-color: #111;
+      border-radius: 5px;
+      margin-top: 10px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .graph-line {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      stroke: var(--primary-color);
+      stroke-width: 2;
+      fill: none;
+    }
+
+    .graph-area {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      fill: rgba(93, 92, 222, 0.1);
+    }
+
+    .network-stats {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+    }
+
+    .network-stat {
+      text-align: center;
+      flex: 1;
+    }
+
+    .stat-value {
+      font-size: 1.1em;
+      font-weight: bold;
+      color: #fff;
+    }
+
+    .stat-label {
+      font-size: 0.8em;
+      color: #888;
+    }
+
+    .update-modal {
+      display: none;
+      position: fixed;
+      z-index: 100;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.85);
+      overflow: auto;
+    }
+
+    .update-modal-content {
+      background-color: #111;
+      color: #eee;
+      margin: 15% auto;
+      padding: 20px;
+      border-radius: 8px;
+      max-width: 600px;
+      box-shadow: 0 0 30px rgba(93, 92, 222, 0.5);
+      border: 1px solid #333;
+    }
+
+    .update-progress {
+      margin-top: 20px;
+      background-color: #333;
+      border-radius: 10px;
+      height: 20px;
+      overflow: hidden;
+    }
+
+    .update-progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #5D5CDE, #7e57c2);
+      transition: width 0.5s ease;
+    }
+
+    .update-log {
+      margin-top: 20px;
+      background-color: #0a0a0a;
+      border: 1px solid #333;
+      border-radius: 5px;
+      padding: 10px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      color: #0f0;
+      height: 200px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+    }
+
+    .error-screen {
+      background-color: #1a0000;
+      color: #ff5f56;
+      padding: 20px;
+      border-radius: 8px;
+      margin-top: 20px;
+      font-family: 'Courier New', monospace;
+      border: 1px solid #ff5f56;
+      display: none;
+    }
+
+    .blue-screen {
+      background-color: #000066;
+      color: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin-top: 20px;
+      font-family: 'Courier New', monospace;
+      display: none;
+    }
+
+    .system-restore {
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .rotating {
+      animation: rotate 2s linear infinite;
+      display: inline-block;
+    }
+
+    .thinking-animation {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(93, 92, 222, 0.3);
+      border-radius: 50%;
+      border-top-color: var(--primary-color);
+      animation: rotate 1s linear infinite;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+
+    .version-update {
+      background-color: rgba(93, 92, 222, 0.2);
+      border-left: 3px solid var(--primary-color);
+      padding: 10px;
+      margin: 10px 0;
+      animation: fadeIn 0.5s;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .tab-container {
+      display: flex;
+      overflow-x: auto;
+      background-color: #222;
+      border-bottom: 1px solid #333;
+      scrollbar-width: thin;
+      scrollbar-color: #666 #222;
+    }
+
+    .tab-container::-webkit-scrollbar {
+      height: 4px;
+    }
+
+    .tab-container::-webkit-scrollbar-track {
+      background: #222;
+    }
+
+    .tab-container::-webkit-scrollbar-thumb {
+      background-color: #666;
+      border-radius: 2px;
+    }
+
+    .tab {
+      padding: 8px 15px;
+      background-color: #1a1a1a;
+      color: #ccc;
+      border-right: 1px solid #333;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background-color 0.2s;
+    }
+
+    .tab:hover {
+      background-color: #2a2a2a;
+    }
+
+    .tab.active {
+      background-color: #333;
+      color: white;
+      border-bottom: 2px solid var(--primary-color);
+    }
+
+    .tab-content {
+      display: none;
+      padding: 15px;
+      background-color: #1a1a1a;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .kernel-panic {
+      background-color: #300;
+      color: #ff5f56;
+      padding: 20px;
+      border-radius: 8px;
+      margin-top: 20px;
+      font-family: 'Courier New', monospace;
+      border: 1px solid #900;
+      display: none;
+    }
+
+    .ascii-art {
+      font-family: monospace;
+      white-space: pre;
+      font-size: 12px;
+      line-height: 1.2;
+      margin: 10px 0;
+      color: #5D5CDE;
+    }
+
+    /* API Key Section */
+    .api-key-section {
+      background-color: rgba(30, 30, 30, 0.6);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 16px;
+      border: 1px solid #333;
+    }
+
+    .api-key-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .api-key-title {
+      font-size: 18px;
+      font-weight: bold;
+      color: #fff;
+    }
+
+    /* Quick Chat Interface */
+    .quick-chat-container {
+      background-color: rgba(30, 30, 30, 0.6);
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 16px;
+      border: 1px solid #333;
+    }
+
+    .quick-chat-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .quick-chat-title {
+      font-size: 18px;
+      font-weight: bold;
+      color: #fff;
+    }
+
+    .quick-chat-status {
+      display: flex;
+      align-items: center;
+      font-size: 12px;
+    }
+
+    .quick-chat-input-container {
+      display: flex;
+      gap: 8px;
+    }
+
+    .quick-chat-input {
+      flex-grow: 1;
+      background-color: #222;
+      color: #fff;
+      border: 1px solid #444;
+      border-radius: 4px;
+      padding: 8px 12px;
+      font-size: 16px;
+    }
+
+    .quick-chat-input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+    }
+
+    .quick-chat-input:disabled {
+      background-color: #1a1a1a;
+      color: #666;
+      cursor: not-allowed;
+    }
+
+    .send-chat-button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 8px 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .send-chat-button:hover:not(:disabled) {
+      background-color: #4a49b7;
+    }
+
+    .send-chat-button:disabled {
+      background-color: #444;
+      cursor: not-allowed;
+    }
+
+    @media (max-width: 640px) {
+      .terminal-body {
+        height: 350px;
+      }
+      .message-content {
+        max-width: 95%;
+      }
+      .metrics-grid {
+        grid-template-columns: 1fr;
+      }
+      .model-selector {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body class="antialiased bg-gray-900 text-white transition-colors duration-200">
+  <div class="container mx-auto px-4 py-6 max-w-4xl">
+    <header class="mb-6">
+      <h1 class="text-2xl font-bold text-white flex items-center">
+        <span class="bg-gradient-to-r from-purple-500 to-indigo-600 text-white p-2 rounded-lg mr-2">N</span>
+        NexusAI <span class="text-sm ml-2 text-gray-400" id="version-display">v3.5.7</span>
+      </h1>
+      <p class="text-gray-400 mt-1">Advanced Generalized Intelligence Interface</p>
+    </header>
+
+    <!-- API Key Section -->
+    <div class="api-key-section">
+      <div class="api-key-header">
+        <h2 class="api-key-title">OpenAI API Configuration</h2>
+        <div>
+          <span id="api-status-indicator" class="inline-block w-3 h-3 rounded-full bg-red-500 mr-1"></span>
+          <span id="api-status-text" class="text-sm text-red-500">Not connected</span>
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-4">
+        <div class="flex flex-col md:flex-row gap-4">
+          <div class="flex-grow">
+            <label for="api-key-input" class="block text-sm font-medium text-gray-300 mb-1">API Key</label>
+            <div class="flex">
+              <input 
+                type="password" 
+                id="api-key-input" 
+                class="flex-grow text-base rounded-l-lg border border-gray-600 bg-gray-700 text-white px-3 py-2 focus:outline-none focus:ring-1 focus:ring-indigo-500" 
+                placeholder="sk-..." 
+                autocomplete="off"
+              >
+              <button 
+                id="toggle-api-visibility" 
+                class="px-3 py-2 bg-gray-600 border border-gray-600 rounded-r-lg hover:bg-gray-500"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-5 h-5">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label for="api-model-select" class="block text-sm font-medium text-gray-300 mb-1">Model</label>
+            <select 
+              id="api-model-select" 
+              class="w-full text-base rounded-lg border border-gray-600 bg-gray-700 text-white px-3 py-2 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            >
+              <option value="gpt-4o">GPT-4o</option>
+              <option value="gpt-4-turbo">GPT-4 Turbo</option>
+              <option value="gpt-3.5-turbo" selected>GPT-3.5 Turbo</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="flex justify-end">
+          <button 
+            id="test-api-button" 
+            class="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-lg font-medium"
+          >
+            Test Connection
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Chat Interface -->
+    <div class="quick-chat-container">
+      <div class="quick-chat-header">
+        <h2 class="quick-chat-title">Quick Chat with OpenAI</h2>
+        <div class="quick-chat-status">
+          <span id="chat-status-dot" class="inline-block w-2 h-2 rounded-full bg-red-500 mr-1"></span>
+          <span id="chat-status-text" class="text-gray-400">Connect API to chat</span>
+        </div>
+      </div>
+
+      <div class="quick-chat-input-container">
+        <input 
+          type="text" 
+          id="quick-chat-input" 
+          class="quick-chat-input" 
+          placeholder="Connect to OpenAI API first..." 
+          disabled
+        >
+        <button 
+          id="send-chat-button" 
+          class="send-chat-button" 
+          disabled
+        >
+          Send
+        </button>
+      </div>
+    </div>
+
+    <main>
+      <!-- Tab navigation for system components -->
+      <div class="tab-container mt-6 mb-4">
+        <div class="tab active" data-tab="terminal">Terminal</div>
+        <div class="tab" data-tab="filesystem">File System</div>
+        <div class="tab" data-tab="processes">Process Manager</div>
+        <div class="tab" data-tab="ml">Neural Core</div>
+        <div class="tab" data-tab="network">Network</div>
+        <div class="tab" data-tab="system">System Info</div>
+      </div>
+
+      <!-- Terminal Tab -->
+      <div class="tab-content active" id="terminal-tab">
+        <div class="terminal mb-6">
+          <div class="terminal-header">
+            <div class="terminal-dots">
+              <div class="dot red"></div>
+              <div class="dot yellow"></div>
+              <div class="dot green"></div>
+            </div>
+            <div class="terminal-title">NexusOS Terminal</div>
+            <div class="w-12"></div>
+          </div>
+          <div class="terminal-body" id="terminal-output">
+            <!-- Terminal output will appear here -->
+          </div>
+          <div class="terminal-input-wrapper">
+            <span class="prompt" id="current-prompt">nexus&gt;</span>
+            <input type="text" id="terminal-input" class="terminal-input" placeholder="Type a command..." autocomplete="off">
+          </div>
+        </div>
+        <div class="flex flex-col sm:flex-row gap-4">
+          <div class="w-full sm:w-1/2">
+            <div class="bg-gray-800 rounded-lg p-4 shadow">
+              <h2 class="text-lg font-semibold text-white mb-3">Quick Commands</h2>
+              <div class="grid grid-cols-2 gap-2">
+                <button class="command-btn text-sm bg-gray-700 hover:bg-gray-600 text-white py-2 px-3 rounded" data-command="help">Help</button>
+                <button class="command-btn text-sm bg-gray-700 hover:bg-gray-600 text-white py-2 px-3 rounded" data-command="system:status">System Status</button>
+                <button class="command-btn text-sm bg-gray-700 hover:bg-gray-600 text-white py-2 px-3 rounded" data-command="system:update">Check for Updates</button>
+                <button class="command-btn text-sm bg-gray-700 hover:bg-gray-600 text-white py-2 px-3 rounded" data-command="clear">Clear Terminal</button>
+              </div>
+            </div>
+          </div>
+          <div class="w-full sm:w-1/2">
+            <div class="bg-gray-800 rounded-lg p-4 shadow">
+              <h2 class="text-lg font-semibold text-white mb-3">About NexusAI</h2>
+              <p class="text-sm text-gray-300">
+                NexusAI is an advanced conversational interface with simulated AGI capabilities.
+                Interact with the system using natural language or terminal commands.
+              </p>
+              <div class="text-xs text-gray-400 mt-2">
+                <p>Version: <span id="version-info">3.5.7 (Quantum Core)</span></p>
+                <p>Last updated: <span id="lastUpdated"></span></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- File System Tab -->
+      <div class="tab-content" id="filesystem-tab">
+        <div class="file-explorer">
+          <div class="file-explorer-header">
+            <span>File System</span>
+            <div>
+              <button id="new-file-btn" class="text-xs bg-blue-600 hover:bg-blue-700 text-white py-1 px-2 rounded">New File</button>
+              <button id="new-folder-btn" class="text-xs bg-yellow-600 hover:bg-yellow-700 text-white py-1 px-2 rounded ml-2">New Folder</button>
+            </div>
+          </div>
+          <div class="breadcrumb" id="file-breadcrumb">
+            <a data-path="/">root</a> <span>/</span>
+          </div>
+          <div class="file-explorer-body" id="file-explorer-content">
+            <!-- File list will be generated here -->
+          </div>
+        </div>
+        <div id="file-content-view" class="file-content hidden"></div>
+        <div id="file-editor" class="file-editor">
+          <div class="file-editor-header">
+            <span id="editor-filename">editor</span>
+            <div class="file-editor-actions">
+              <button id="save-file-btn" class="text-xs bg-green-600 hover:bg-green-700 text-white py-1 px-2 rounded">Save</button>
+              <button id="cancel-edit-btn" class="text-xs bg-red-600 hover:bg-red-700 text-white py-1 px-2 rounded">Cancel</button>
+            </div>
+          </div>
+          <div class="file-editor-body">
+            <textarea id="file-editor-content" class="editor-textarea"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Process Manager Tab -->
+      <div class="tab-content" id="processes-tab">
+        <div class="process-manager">
+          <div class="process-header">
+            <span>Process Manager</span>
+            <button id="refresh-processes" class="text-xs bg-blue-600 hover:bg-blue-700 text-white py-1 px-2 rounded">Refresh</button>
+          </div>
+          <div class="process-body">
+            <table class="process-table">
+              <thead>
+                <tr>
+                  <th>PID</th>
+                  <th>Name</th>
+                  <th>Status</th>
+                  <th>CPU</th>
+                  <th>Memory</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="process-list">
+                <!-- Process list will be generated here -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="mt-4">
+          <h3 class="text-lg font-semibold text-white mb-2">System Resources</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="bg-gray-800 p-4 rounded-lg">
+              <div class="flex justify-between mb-2">
+                <span class="text-sm text-gray-300">CPU Usage</span>
+                <span class="text-sm text-gray-300" id="cpu-usage-value">42%</span>
+              </div>
+              <div class="w-full bg-gray-700 rounded-full h-3">
+                <div class="bg-blue-600 h-3 rounded-full" id="cpu-usage-bar" style="width: 42%"></div>
+              </div>
+            </div>
+            <div class="bg-gray-800 p-4 rounded-lg">
+              <div class="flex justify-between mb-2">
+                <span class="text-sm text-gray-300">Memory Usage</span>
+                <span class="text-sm text-gray-300" id="memory-usage-value">3.2GB / 8GB</span>
+              </div>
+              <div class="w-full bg-gray-700 rounded-full h-3">
+                <div class="bg-purple-600 h-3 rounded-full" id="memory-usage-bar" style="width: 40%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Neural Core Tab -->
+      <div class="tab-content" id="ml-tab">
+        <div class="ml-section">
+          <div class="ml-header">
+            <span>Neural Core</span>
+            <button id="train-model-btn" class="text-xs bg-purple-600 hover:bg-purple-700 text-white py-1 px-2 rounded">Train Model</button>
+          </div>
+          <div class="ml-body">
+            <div class="flex justify-between items-center">
+              <h3 class="text-sm font-semibold text-gray-300">NexusCore Training Status</h3>
+              <span class="text-sm text-green-500" id="training-status">Ready</span>
+            </div>
+            <div class="training-progress">
+              <div class="training-progress-bar" id="training-progress-bar" style="width: 0%"></div>
+            </div>
+            <h3 class="text-sm font-semibold text-gray-300 mt-4">Active Models</h3>
+            <div class="model-selector">
+              <div class="model-option active" data-model="language">Language Model v2.4</div>
+              <div class="model-option" data-model="vision">Vision Model v1.8</div>
+              <div class="model-option" data-model="reasoning">Reasoning Core v3.1</div>
+              <div class="model-option" data-model="generative">Generative Model v2.2</div>
+            </div>
+            <h3 class="text-sm font-semibold text-gray-300 mt-4">Performance Metrics</h3>
+            <div class="metrics-grid">
+              <div class="metric-card">
+                <span class="metric-name">Accuracy</span>
+                <span class="metric-value" id="accuracy-metric">94.8%</span>
+              </div>
+              <div class="metric-card">
+                <span class="metric-name">Latency</span>
+                <span class="metric-value" id="latency-metric">18ms</span>
+              </div>
+              <div class="metric-card">
+                <span class="metric-name">Tokens/second</span>
+                <span class="metric-value" id="tokens-metric">1,250</span>
+              </div>
+              <div class="metric-card">
+                <span class="metric-name">Knowledge Size</span>
+                <span class="metric-value" id="knowledge-metric">450TB</span>
+              </div>
+            </div>
+            <h3 class="text-sm font-semibold text-gray-300 mt-4">Recent Improvements</h3>
+            <ul class="text-sm text-gray-400 list-disc pl-5 mt-2" id="improvements-list">
+              <li>Context window expanded to 1M tokens</li>
+              <li>Reasoning accuracy improved by 3.2%</li>
+              <li>Response generation latency reduced by 18%</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Network Tab -->
+      <div class="tab-content" id="network-tab">
+        <div class="network-section">
+          <div class="network-header">
+            <span>Network Statistics</span>
+            <button id="refresh-network" class="text-xs bg-blue-600 hover:bg-blue-700 text-white py-1 px-2 rounded">Refresh</button>
+          </div>
+          <div class="network-body">
+            <div class="network-graph" id="network-graph">
+              <svg width="100%" height="100%" id="network-svg">
+                <defs>
+                  <linearGradient id="areaGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="rgba(93, 92, 222, 0.5)" />
+                    <stop offset="100%" stop-color="rgba(93, 92, 222, 0)" />
+                  </linearGradient>
+                </defs>
+                <path class="graph-area" fill="url(#areaGradient)" />
+                <path class="graph-line" stroke="#5D5CDE" />
+              </svg>
+            </div>
+            <div class="network-stats">
+              <div class="network-stat">
+                <div class="stat-value" id="connections-stat">1,024</div>
+                <div class="stat-label">Connections</div>
+              </div>
+              <div class="network-stat">
+                <div class="stat-value" id="bandwidth-stat">4.2 GB/s</div>
+                <div class="stat-label">Bandwidth</div>
+              </div>
+              <div class="network-stat">
+                <div class="stat-value" id="latency-stat">12ms</div>
+                <div class="stat-label">Latency</div>
+              </div>
+              <div class="network-stat">
+                <div class="stat-value" id="packets-stat">125K/s</div>
+                <div class="stat-label">Packets</div>
+              </div>
+            </div>
+            <h3 class="text-sm font-semibold text-gray-300 mt-4">Active Connections</h3>
+            <table class="process-table mt-2">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Type</th>
+                  <th>Source</th>
+                  <th>Destination</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="connections-list">
+                <!-- Connection list will be generated here -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- System Info Tab -->
+      <div class="tab-content" id="system-tab">
+        <div class="context-panel mb-6">
+          <div class="context-header" id="context-toggle">
+            <span>System Information</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-down" viewBox="0 0 16 16">
+              <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/>
+            </svg>
+          </div>
+          <div class="context-body" id="context-body">
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <h3 class="text-sm font-semibold mb-2 text-gray-300">Core Systems</h3>
+                <ul class="space-y-1 text-xs">
+                  <li>
+                    <span class="inline-block w-3 h-3 rounded-full bg-green-500 mr-1"></span>
+                    NexusKernel <span id="kernel-version">v3.5.7</span>
+                  </li>
+                  <li>
+                    <span class="inline-block w-3 h-3 rounded-full bg-green-500 mr-1"></span>
+                    Logic Engine <span id="logic-version">v2.9</span>
+                  </li>
+                  <li>
+                    <span class="inline-block w-3 h-3 rounded-full bg-green-500 mr-1"></span>
+                    Response Generator <span id="response-version">v4.2</span>
+                  </li>
+                  <li>
+                    <span class="inline-block w-3 h-3 rounded-full bg-yellow-500 mr-1"></span>
+                    Self-Modification Module <span id="selfmod-version">v1.8</span>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h3 class="text-sm font-semibold mb-2 text-gray-300">Resources</h3>
+                <ul class="space-y-1 text-xs">
+                  <li>
+                    Memory: 
+                    <div class="w-full bg-gray-700 rounded-full h-2 mt-1">
+                      <div class="bg-blue-600 h-2 rounded-full" style="width: 68%"></div>
+                    </div>
+                  </li>
+                  <li>
+                    Processing: 
+                    <div class="w-full bg-gray-700 rounded-full h-2 mt-1">
+                      <div class="bg-purple-600 h-2 rounded-full" style="width: 42%"></div>
+                    </div>
+                  </li>
+                  <li>
+                    Knowledge Base: 
+                    <div class="w-full bg-gray-700 rounded-full h-2 mt-1">
+                      <div class="bg-green-600 h-2 rounded-full" style="width: 92%"></div>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <div class="mt-4">
+              <h3 class="text-sm font-semibold mb-2 text-gray-300">Recent System Events</h3>
+              <div class="text-xs space-y-1" id="system-events">
+                <p><span class="text-green-400">✓</span> Security module updated [Today, 09:23]</p>
+                <p><span class="text-yellow-400">!</span> Knowledge extraction optimized [Today, 08:15]</p>
+                <p><span class="text-green-400">✓</span> Response latency reduced by 18% [Yesterday]</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="status-bar rounded flex justify-between text-xs text-gray-400 mb-6">
+          <div class="status-item">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
+              <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.25-11.25v3.25h3a.75.75 0 0 1 0 1.5h-3v3.25a.75.75 0 0 1-1.5 0v-3.25h-3a.75.75 0 0 1 0-1.5h3v-3.25a.75.75 0 0 1 1.5 0z"/>
+            </svg>
+            <span>Connected</span>
+          </div>
+          <div class="status-item" id="currentTime">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
+              <path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/>
+              <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/>
+            </svg>
+            <span>00:00:00</span>
+          </div>
+          <div class="status-item">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16" class="rotating">
+              <path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z"/>
+              <path fill-rule="evenodd" d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.9A5.002 5.002 0 0 0 8 3zM3.1 9a5.002 5.002 0 0 0 8.757 2.182.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9H3.1z"/>
+            </svg>
+            <span>System Active</span>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Update Modal -->
+  <div id="update-modal" class="update-modal">
+    <div class="update-modal-content">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-lg font-bold text-white">System Update in Progress</h2>
+        <span id="update-version" class="text-sm text-gray-400">v3.5.8</span>
+      </div>
+      <p class="text-gray-300 mb-4">Please do not interrupt this process. The system is updating critical components.</p>
+      <div class="update-progress">
+        <div class="update-progress-bar" id="update-progress-bar" style="width: 0%"></div>
+      </div>
+      <div class="flex justify-between text-sm text-gray-400 mt-2">
+        <span id="update-progress-text">0%</span>
+        <span id="update-step">Initializing</span>
+      </div>
+      <div class="update-log" id="update-log">
+        <!-- Update logs will appear here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Error Screen -->
+  <div id="error-screen" class="error-screen">
+    <h2 class="text-xl font-bold mb-4">SYSTEM ERROR</h2>
+    <div id="error-message" class="mb-4">Error message will appear here</div>
+    <div id="error-code" class="mb-4">Error code: NX-000</div>
+    <div id="error-solution" class="mb-4">Recommended solution will appear here</div>
+    <div class="system-restore">
+      <button id="restore-system-btn" class="bg-gray-800 hover:bg-gray-700 text-white py-2 px-4 rounded">
+        Restore System
+      </button>
+    </div>
+  </div>
+
+  <!-- Blue Screen -->
+  <div id="blue-screen" class="blue-screen">
+    <div class="ascii-art">
+      _   __                     ____  _____
+     / | / /__  _  ____  _______/ __ \/ ___/
+    /  |/ / _ \| |/_/ / / / ___/ / / /\__ \ 
+   / /|  /  __/>  </ /_/ (__  ) /_/ /___/ / 
+  /_/ |_/\___/_/|_|\__,_/____/\____//____/  
+          KERNEL PANIC
+    </div>
+    <h2 class="text-xl font-bold mb-4">A fatal system error has occurred</h2>
+    <div id="bsod-message" class="mb-4">Error details will appear here</div>
+    <div id="bsod-code" class="mb-4">STOP: 0x0000021A</div>
+    <div class="mb-4">
+      The system has been halted to prevent damage to neural pathways.
+    </div>
+    <div class="system-restore mt-8">
+      <button id="reboot-system-btn" class="bg-gray-800 hover:bg-gray-700 text-white py-2 px-4 rounded">
+        Reboot System
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // === CONFIGURATION ===
+    // This is the default model. Users can change it in the UI.
+    const DEFAULT_OPENAI_MODEL = "gpt-3.5-turbo";
+
+    // === DOM ELEMENT REFERENCES ===
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log("NexusAI system initializing...");
+
+      const terminalOutput = document.getElementById('terminal-output');
+      const terminalInput = document.getElementById('terminal-input');
+      const contextToggle = document.getElementById('context-toggle');
+      const contextBody = document.getElementById('context-body');
+      const currentTimeElement = document.getElementById('currentTime').querySelector('span');
+      const lastUpdatedElement = document.getElementById('lastUpdated');
+      const currentPromptElement = document.getElementById('current-prompt');
+      const versionDisplay = document.getElementById('version-display');
+      const versionInfo = document.getElementById('version-info');
+      const kernelVersion = document.getElementById('kernel-version');
+      const updateLog = document.getElementById('update-log');
+      const systemEventsElement = document.getElementById('system-events');
+
+      // OpenAI API UI elements
+      const apiKeyInput = document.getElementById('api-key-input');
+      const apiModelSelect = document.getElementById('api-model-select');
+      const apiStatusIndicator = document.getElementById('api-status-indicator');
+      const apiStatusText = document.getElementById('api-status-text');
+      const testApiButton = document.getElementById('test-api-button');
+      const toggleApiVisibility = document.getElementById('toggle-api-visibility');
+
+      // Quick Chat UI elements
+      const quickChatInput = document.getElementById('quick-chat-input');
+      const sendChatButton = document.getElementById('send-chat-button');
+      const chatStatusDot = document.getElementById('chat-status-dot');
+      const chatStatusText = document.getElementById('chat-status-text');
+
+      const networkGraph = document.getElementById('network-graph');
+      const networkSvg = document.getElementById('network-svg');
+      const connectionsStatElement = document.getElementById('connections-stat');
+      const bandwidthStatElement = document.getElementById('bandwidth-stat');
+      const latencyStatElement = document.getElementById('latency-stat');
+      const packetsStatElement = document.getElementById('packets-stat');
+      const connectionsListElement = document.getElementById('connections-list');
+
+      const processListElement = document.getElementById('process-list');
+      const cpuUsageBar = document.getElementById('cpu-usage-bar');
+      const cpuUsageValue = document.getElementById('cpu-usage-value');
+      const memoryUsageBar = document.getElementById('memory-usage-bar');
+      const memoryUsageValue = document.getElementById('memory-usage-value');
+
+      const trainingStatusElement = document.getElementById('training-status');
+      const trainingProgressBar = document.getElementById('training-progress-bar');
+      const accuracyMetric = document.getElementById('accuracy-metric');
+      const latencyMetric = document.getElementById('latency-metric');
+      const tokensMetric = document.getElementById('tokens-metric');
+      const knowledgeMetric = document.getElementById('knowledge-metric');
+      const improvementsListElement = document.getElementById('improvements-list');
+
+      const fileBreadcrumb = document.getElementById('file-breadcrumb');
+      const fileExplorerContent = document.getElementById('file-explorer-content');
+      const fileContentView = document.getElementById('file-content-view');
+      const fileEditor = document.getElementById('file-editor');
+      const editorFilename = document.getElementById('editor-filename');
+      const fileEditorContent = document.getElementById('file-editor-content');
+
+      const updateModal = document.getElementById('update-modal');
+      const updateProgressBarModal = document.getElementById('update-progress-bar');
+      const updateProgressText = document.getElementById('update-progress-text');
+      const updateVersionElement = document.getElementById('update-version');
+      const updateStepElement = document.getElementById('update-step');
+      const errorScreen = document.getElementById('error-screen');
+      const errorMessage = document.getElementById('error-message');
+      const errorCode = document.getElementById('error-code');
+      const errorSolution = document.getElementById('error-solution');
+      const blueScreen = document.getElementById('blue-screen');
+      const bsodMessage = document.getElementById('bsod-message');
+      const bsodCode = document.getElementById('bsod-code');
+
+      const updateSystemBtn = document.getElementById('update-system-btn');
+      const upgradeBtn = document.getElementById('upgrade-core-btn');
+      const optimizeBtn = document.getElementById('optimize-system-btn');
+      const backupBtn = document.getElementById('backup-system-btn');
+      const restoreBtn = document.getElementById('restore-system-btn');
+      const rebootBtn = document.getElementById('reboot-system-btn');
+      const refreshNetworkBtn = document.getElementById('refresh-network');
+      const refreshProcessesBtn = document.getElementById('refresh-processes');
+      const trainModelBtn = document.getElementById('train-model-btn');
+      const newFileBtn = document.getElementById('new-file-btn');
+      const newFolderBtn = document.getElementById('new-folder-btn');
+      const saveFileBtn = document.getElementById('save-file-btn');
+      const cancelEditBtn = document.getElementById('cancel-edit-btn');
+
+      const tabs = document.querySelectorAll('.tab');
+      const tabContents = document.querySelectorAll('.tab-content');
+
+      // Initialize tab navigation
+      tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          tabs.forEach(t => t.classList.remove('active'));
+          tabContents.forEach(c => c.classList.remove('active'));
+          tab.classList.add('active');
+          const tabId = `${tab.getAttribute('data-tab')}-tab`;
+          document.getElementById(tabId).classList.add('active');
+        });
+      });
+
+      // === SYSTEM CONFIGURATION ===
+      const system = {
+        name: "NexusAI",
+        version: "3.5.7",
+        codename: "Quantum Core",
+        bootTime: new Date(),
+        lastUpdate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
+        updateAvailable: false,
+        capabilities: [
+          "Natural Language Processing",
+          "Context Awareness",
+          "Self-Improvement",
+          "Knowledge Integration",
+          "Neural Network Adaptation",
+          "Automated System Optimization"
+        ],
+        kernelVersion: "3.5.7",
+        logicVersion: "2.9",
+        responseVersion: "4.2",
+        selfModVersion: "1.8",
+        updateHistory: [
+          {
+            version: "3.5.7",
+            date: "3 days ago",
+            changes: [
+              "Improved response accuracy by 12%",
+              "Expanded knowledge base with 15TB new data",
+              "Reduced latency by 18%",
+              "Fixed memory leaks in neural optimization module"
+            ]
+          },
+          {
+            version: "3.5.6",
+            date: "2 weeks ago",
+            changes: [
+              "Enhanced pattern recognition algorithms",
+              "Implemented security patches for core systems",
+              "Added advanced visualization components",
+              "Optimized file system performance"
+            ]
+          },
+          {
+            version: "3.5.5",
+            date: "1 month ago",
+            changes: [
+              "Major reasoning engine upgrades",
+              "Fixed critical bugs in memory management",
+              "Added comprehensive system monitoring",
+              "Expanded multimodal processing capabilities"
+            ]
+          }
+        ],
+        commands: [
+          { name: "help", description: "Display available commands" },
+          { name: "system:status", description: "Show system status information" },
+          { name: "system:update", description: "Check for and install system updates" },
+          { name: "system:info", description: "Display detailed system information" },
+          { name: "system:history", description: "Show system update history" },
+          { name: "fs:list", description: "List files in current directory" },
+          { name: "fs:cd [path]", description: "Change current directory" },
+          { name: "fs:cat [file]", description: "Display file contents" },
+          { name: "fs:edit [file]", description: "Edit file contents" },
+          { name: "fs:mkdir [name]", description: "Create a new directory" },
+          { name: "fs:touch [name]", description: "Create a new file" },
+          { name: "fs:rm [path]", description: "Remove a file or directory" },
+          { name: "process:list", description: "List running processes" },
+          { name: "process:kill [pid]", description: "Terminate a process" },
+          { name: "network:status", description: "Display network status" },
+          { name: "clear", description: "Clear terminal output" },
+          { name: "ml:train", description: "Train neural network models" },
+          { name: "ml:status", description: "Show machine learning status" },
+          { name: "kernel:optimize", description: "Optimize system kernel" },
+          { name: "openai:test", description: "Test OpenAI API connection" },
+          { name: "openai:chat [text]", description: "Send message to OpenAI" }
+        ],
+        systemEvents: [
+          { type: "success", message: "Security module updated", time: "Today, 09:23" },
+          { type: "warning", message: "Knowledge extraction optimized", time: "Today, 08:15" },
+          { type: "success", message: "Response latency reduced by 18%", time: "Yesterday" }
+        ],
+        apiStatus: {
+          connected: false,
+          lastTested: null,
+          model: DEFAULT_OPENAI_MODEL
+        },
+        currentDirectory: "/",
+        processCount: 0,
+        trainingInProgress: false
+      };
+
+      // === SIMULATED FILE SYSTEM ===
+      const fileSystem = [
+        {
+          name: "system",
+          type: "folder",
+          path: "/system",
+          children: [
+            { name: "kernel.nx", type: "file", content: "NexusOS Kernel v3.5.7\nBuild: 20230815-Q4\nArchitecture: Quantum Neural\n\nThis is the core system kernel responsible for managing all NexusAI operations." },
+            { name: "config.json", type: "file", content: '{\n  "version": "3.5.7",\n  "buildDate": "2023-08-15",\n  "maxThreads": 16,\n  "aiModels": ["openai-gpt4", "nexus-core"],\n  "defaultModel": "nexus-core",\n  "securityLevel": "high",\n  "debugMode": false,\n  "loggingEnabled": true\n}' },
+            { name: "VERSION", type: "file", content: "3.5.7" },
+            { name: "CHANGELOG", type: "file", content: "# Changelog\n\n## 3.5.7 (Current)\n- Improved response accuracy by 12%\n- Expanded knowledge base with 15TB new data\n- Reduced latency by 18%\n- Fixed memory leaks in neural optimization module\n\n## 3.5.6\n- Enhanced pattern recognition algorithms\n- Implemented security patches for core systems\n- Added advanced visualization components\n- Optimized file system performance\n\n## 3.5.5\n- Major reasoning engine upgrades\n- Fixed critical bugs in memory management\n- Added comprehensive system monitoring\n- Expanded multimodal processing capabilities" }
+          ]
+        },
+        {
+          name: "data",
+          type: "folder",
+          path: "/data",
+          children: [
+            { name: "knowledge_base.db", type: "file", content: "[DATABASE CONTENT - BINARY DATA]" },
+            { name: "user_preferences.json", type: "file", content: '{\n  "theme": "auto",\n  "fontSize": "medium",\n  "notifications": true,\n  "telemetry": false,\n  "autoUpdates": true,\n  "defaultModel": "nexus-core",\n  "speechRecognition": true\n}' },
+            { name: "interaction_history.log", type: "file", content: "2023-09-01 08:23:15 - User requested system status\n2023-09-01 08:25:42 - User initialized neural network training\n2023-09-01 09:12:03 - User updated system configuration\n2023-09-01 10:45:18 - User optimized kernel parameters\n2023-09-01 11:30:55 - System update initiated by user" }
+          ]
+        },
+        {
+          name: "modules",
+          type: "folder",
+          path: "/modules",
+          children: [
+            { name: "language.nx", type: "file", content: "NexusAI Language Processing Module v2.4\nThis module handles natural language understanding and generation." },
+            { name: "vision.nx", type: "file", content: "NexusAI Vision Processing Module v1.8\nThis module handles image and video analysis." },
+            { name: "reasoning.nx", type: "file", content: "NexusAI Reasoning Core v3.1\nThis module handles logic, reasoning, and problem-solving." },
+            { name: "generative.nx", type: "file", content: "NexusAI Generative Module v2.2\nThis module handles content generation and creative tasks." }
+          ]
+        },
+        {
+          name: "logs",
+          type: "folder",
+          path: "/logs",
+          children: [
+            { name: "system.log", type: "file", content: "2023-09-01 00:00:01 [INFO] System initialization\n2023-09-01 00:00:02 [INFO] Loading kernel modules\n2023-09-01 00:00:03 [INFO] Initializing neural pathways\n2023-09-01 00:00:04 [INFO] Loading knowledge base\n2023-09-01 00:00:05 [INFO] System ready\n2023-09-01 08:15:22 [INFO] User session started\n2023-09-01 09:23:10 [INFO] Security module updated" },
+            { name: "errors.log", type: "file", content: "2023-08-30 14:23:45 [ERROR] Memory allocation failed in neural optimization module\n2023-08-30 14:23:46 [INFO] Auto-recovery initiated\n2023-08-30 14:23:50 [INFO] Memory leak fixed\n2023-08-30 14:23:55 [INFO] System stability restored" },
+            { name: "updates.log", type: "file", content: "2023-08-29 03:15:00 [INFO] Update v3.5.7 available\n2023-08-29 03:15:10 [INFO] Downloading update components\n2023-08-29 03:16:30 [INFO] Verifying update integrity\n2023-08-29 03:17:45 [INFO] Installing update\n2023-08-29 03:20:12 [INFO] Update complete - system restarting" }
+          ]
+        },
+        {
+          name: "README.md",
+          type: "file",
+          content: "# NexusAI System\n\nAdvanced Generalized Intelligence Interface\n\n## Overview\n\nNexusAI is a simulated advanced AI system with multiple components:\n\n- Neural Core for processing and learning\n- File System for data organization\n- Process Manager for task handling\n- Network interface for connectivity\n\n## Usage\n\nInteract with the system through terminal commands or natural language.\nType 'help' to see available commands.\n\n## About\n\nThis is a demonstration of an advanced AI interface concept."
+        },
+        {
+          name: "LICENSE",
+          type: "file",
+          content: "MIT License\n\nCopyright (c) 2023 NexusAI\n\nPermission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \"Software\"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software."
+        }
+      ];
+
+      // === SIMULATED PROCESSES ===
+      let processes = [
+        { pid: 1, name: "system-core", status: "running", cpu: "2.4%", memory: "128MB", startTime: new Date(Date.now() - 3600000 * 24) },
+        { pid: 12, name: "knowledge-indexer", status: "running", cpu: "14.2%", memory: "512MB", startTime: new Date(Date.now() - 3600000 * 5) },
+        { pid: 34, name: "language-model", status: "running", cpu: "32.6%", memory: "1.8GB", startTime: new Date(Date.now() - 3600000 * 2) },
+        { pid: 56, name: "reasoning-engine", status: "running", cpu: "18.9%", memory: "756MB", startTime: new Date(Date.now() - 3600000) },
+        { pid: 78, name: "network-service", status: "running", cpu: "1.2%", memory: "64MB", startTime: new Date(Date.now() - 1800000) },
+        { pid: 91, name: "system-monitor", status: "running", cpu: "0.8%", memory: "48MB", startTime: new Date(Date.now() - 900000) },
+        { pid: 104, name: "temp-process-xyz", status: "idle", cpu: "0.0%", memory: "12MB", startTime: new Date(Date.now() - 300000) }
+      ];
+
+      // === SIMULATED NETWORK DATA ===
+      let networkConnections = [
+        { id: 1, type: "API", source: "NexusAI", destination: "api.openai.com", status: "pending" },
+        { id: 2, type: "Data", source: "knowledge-indexer", destination: "vector-db", status: "active" },
+        { id: 3, type: "Control", source: "system-core", destination: "model-manager", status: "active" },
+        { id: 4, type: "Sync", source: "system-monitor", destination: "metrics-service", status: "idle" }
+      ];
+
+      // === SIMULATED NEURAL MODELS ===
+      const neuralModels = {
+        language: {
+          name: "Language Model",
+          version: "2.4",
+          accuracy: 94.8,
+          latency: 18,
+          tokensPerSecond: 1250,
+          trainingStatus: "ready",
+          lastTraining: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+        },
+        vision: {
+          name: "Vision Model",
+          version: "1.8",
+          accuracy: 92.3,
+          latency: 24,
+          tokensPerSecond: 850,
+          trainingStatus: "ready",
+          lastTraining: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000)
+        },
+        reasoning: {
+          name: "Reasoning Core",
+          version: "3.1",
+          accuracy: 95.6,
+          latency: 22,
+          tokensPerSecond: 975,
+          trainingStatus: "ready",
+          lastTraining: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000)
+        },
+        generative: {
+          name: "Generative Model",
+          version: "2.2",
+          accuracy: 91.5,
+          latency: 15,
+          tokensPerSecond: 1350,
+          trainingStatus: "ready",
+          lastTraining: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000)
+        }
+      };
+
+      // === UTILITY FUNCTIONS ===
+      function formatDate(date) {
+        return new Intl.DateTimeFormat('en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric'
+        }).format(date);
+      }
+
+      function getRandomInt(min, max) {
+        min = Math.ceil(min);
+        max = Math.floor(max);
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+      }
+
+      function generateRandomNetworkData(pointCount = 50) {
+        const points = [];
+        let lastValue = 50;
+        for (let i = 0; i < pointCount; i++) {
+          const change = Math.random() * 10 - 5;
+          lastValue = Math.max(10, Math.min(90, lastValue + change));
+          points.push(lastValue);
+        }
+        return points;
+      }
+
+      function sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+      }
+
+      function getPathParts(path) {
+        return path.split('/').filter(p => p !== '');
+      }
+
+      function findFileByPath(path) {
+        if (path === '/') return fileSystem;
+
+        const parts = getPathParts(path);
+        let current = fileSystem;
+
+        for (let i = 0; i < parts.length; i++) {
+          const part = parts[i];
+          const found = current.find(item => item.name === part);
+
+          if (!found) return null;
+
+          if (i === parts.length - 1) {
+            return found;
+          }
+
+          if (found.type !== 'folder') return null;
+
+          current = found.children;
+        }
+
+        return null;
+      }
+
+      function getDirectoryByPath(path) {
+        if (path === '/') return fileSystem;
+
+        const parts = getPathParts(path);
+        let current = fileSystem;
+
+        for (const part of parts) {
+          const found = current.find(item => item.name === part);
+          if (!found || found.type !== 'folder') return null;
+          current = found.children;
+        }
+
+        return current;
+      }
+
+      function getParentDirectory(path) {
+        if (path === '/') return '/';
+        const parts = getPathParts(path);
+        parts.pop();
+        return '/' + parts.join('/');
+      }
+
+      // === OPENAI CHAT FUNCTIONALITY ===
+      async function sendChatToOpenAI(userMessage) {
+        const apiKey = apiKeyInput.value.trim();
+        const model = apiModelSelect.value;
+
+        if (!apiKey) {
+          throw new Error("OpenAI API key is not set. Please enter your API key in the configuration section.");
+        }
+
+        if (!system.apiStatus.connected) {
+          throw new Error("OpenAI API is not connected. Please test the connection first using the 'Test Connection' button.");
+        }
+
+        // Build the request payload for ChatCompletion API
+        const payload = {
+          model: model,
+          messages: [
+            { role: "system", content: `You are NexusAI v${system.version}, an advanced AI assistant. Your responses should be helpful, accurate, and conversational.` },
+            { role: "user", content: userMessage }
+          ],
+          temperature: 0.7,
+          max_tokens: 1000
+        };
+
+        try {
+          const response = await fetch("https://api.openai.com/v1/chat/completions", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${apiKey}`
+            },
+            body: JSON.stringify(payload)
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(`OpenAI API error: ${errorData.error?.message || response.statusText}`);
+          }
+
+          const data = await response.json();
+          return data.choices[0].message.content;
+        } catch (error) {
+          // Update API connection status on failure
+          if (!error.message.includes("OpenAI API is not connected")) {
+            updateApiStatus(false, "Error: " + error.message);
+          }
+          throw error;
+        }
+      }
+
+      // Test the OpenAI API connection
+      async function testOpenAIConnection() {
+        const apiKey = apiKeyInput.value.trim();
+
+        if (!apiKey) {
+          updateApiStatus(false, "API key not provided");
+          addLogEntry("Error: OpenAI API key not provided", "error");
+          addLogEntry("Please enter your API key in the configuration section", "info");
+          return false;
+        }
+
+        updateApiStatus('pending', "Testing connection...");
+        addLogEntry("Testing OpenAI API connection...", "system");
+
+        try {
+          // Send a simple test request
+          const payload = {
+            model: apiModelSelect.value,
+            messages: [
+              { role: "system", content: "You are a test assistant." },
+              { role: "user", content: "Respond with only the word: CONNECTED" }
+            ],
+            temperature: 0,
+            max_tokens: 10
+          };
+
+          const response = await fetch("https://api.openai.com/v1/chat/completions", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${apiKey}`
+            },
+            body: JSON.stringify(payload)
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(`API error: ${errorData.error?.message || response.statusText}`);
+          }
+
+          const data = await response.json();
+
+          // Update system state and UI
+          system.apiStatus.connected = true;
+          system.apiStatus.lastTested = new Date();
+          system.apiStatus.model = apiModelSelect.value;
+          updateApiStatus(true, "API connected");
+          updateChatStatus(true, "Ready to chat");
+          addLogEntry("OpenAI API connection successful!", "success");
+
+          // Update the network connections list to show active connection
+          const openaiConnection = networkConnections.find(conn => conn.destination === "api.openai.com");
+          if (openaiConnection) {
+            openaiConnection.status = "active";
+            updateNetworkConnections();
+          }
+
+          return true;
+        } catch (error) {
+          updateApiStatus(false, `Error: ${error.message}`);
+          updateChatStatus(false, "Connect API to chat");
+          addLogEntry(`OpenAI API connection failed: ${error.message}`, "error");
+          return false;
+        }
+      }
+
+      // Update API status indicator
+      function updateApiStatus(status, message) {
+        if (status === true) {
+          apiStatusIndicator.className = "inline-block w-3 h-3 rounded-full bg-green-500 mr-2";
+          apiStatusText.textContent = message || "API connected";
+          apiStatusText.className = "text-sm text-green-500";
+
+          // Enable quick chat input
+          quickChatInput.disabled = false;
+          quickChatInput.placeholder = "Send a message to OpenAI...";
+          sendChatButton.disabled = false;
+
+        } else if (status === false) {
+          apiStatusIndicator.className = "inline-block w-3 h-3 rounded-full bg-red-500 mr-2";
+          apiStatusText.textContent = message || "API not connected";
+          apiStatusText.className = "text-sm text-red-500";
+
+          // Disable quick chat input
+          quickChatInput.disabled = true;
+          quickChatInput.placeholder = "Connect to OpenAI API first...";
+          sendChatButton.disabled = true;
+
+        } else if (status === 'pending') {
+          apiStatusIndicator.className = "inline-block w-3 h-3 rounded-full bg-yellow-500 mr-2 animate-pulse";
+          apiStatusText.textContent = message || "Testing connection...";
+          apiStatusText.className = "text-sm text-yellow-500";
+        }
+      }
+
+      // Update chat status display
+      function updateChatStatus(connected, message) {
+        if (connected) {
+          chatStatusDot.className = "inline-block w-2 h-2 rounded-full bg-green-500 mr-1";
+          chatStatusText.textContent = message || "Ready to chat";
+          chatStatusText.className = "text-green-400";
+        } else {
+          chatStatusDot.className = "inline-block w-2 h-2 rounded-full bg-red-500 mr-1";
+          chatStatusText.textContent = message || "Connect API to chat";
+          chatStatusText.className = "text-gray-400";
+        }
+      }
+
+      // === TERMINAL & CHAT FUNCTIONS ===
+      function addLogEntry(text, type = 'info') {
+        const entry = document.createElement('div');
+        entry.className = `log-entry log-${type}`;
+        entry.innerHTML = text;
+        terminalOutput.appendChild(entry);
+        terminalOutput.scrollTop = terminalOutput.scrollHeight;
+      }
+
+      function addChatMessage(text, sender) {
+        const message = document.createElement('div');
+        message.className = `chat-message ${sender === 'user' ? 'user-message' : ''}`;
+        const avatar = document.createElement('div');
+        avatar.className = `avatar ${sender === 'user' ? 'user-avatar' : 'ai-avatar'}`;
+        avatar.innerText = sender === 'user' ? 'U' : 'N';
+        const content = document.createElement('div');
+        content.className = 'message-content';
+        content.innerHTML = text;
+        message.appendChild(avatar);
+        message.appendChild(content);
+        terminalOutput.appendChild(message);
+        terminalOutput.scrollTop = terminalOutput.scrollHeight;
+      }
+
+      function addSystemMessage(text) {
+        const entry = document.createElement('div');
+        entry.className = 'system-message';
+        entry.innerHTML = text;
+        terminalOutput.appendChild(entry);
+        terminalOutput.scrollTop = terminalOutput.scrollHeight;
+      }
+
+      function clearTerminal() {
+        terminalOutput.innerHTML = '';
+        addLogEntry(`${system.name} v${system.version} "${system.codename}"`, 'system');
+        addLogEntry('Type <span class="text-white">help</span> for available commands.', 'info');
+      }
+
+      function updateCurrentTime() {
+        const now = new Date();
+        currentTimeElement.textContent = now.toLocaleTimeString();
+      }
+
+      function getUptime() {
+        const now = new Date();
+        const diff = now - system.bootTime;
+        const minutes = Math.floor(diff / (1000 * 60));
+        const hours = Math.floor(minutes / 60);
+        const days = Math.floor(hours / 24);
+        if (days > 0) {
+          return `${days}d ${hours % 24}h ${minutes % 60}m`;
+        } else if (hours > 0) {
+          return `${hours}h ${minutes % 60}m`;
+        } else {
+          return `${minutes}m`;
+        }
+      }
+
+      // === CHAT/COMMAND PROCESSING ===
+      async function processInput(input) {
+        // Check if input is a command (starts with "/" or one of the prefixes)
+        if (input.startsWith('/') || input.startsWith('system:') || input.startsWith('fs:') ||
+            input.startsWith('process:') || input.startsWith('network:') || input.startsWith('ml:') ||
+            input.startsWith('kernel:') || input.startsWith('openai:')) {
+          let commandName, args;
+          if (input.startsWith('/')) {
+            const parts = input.substring(1).split(' ');
+            commandName = parts[0];
+            args = parts.slice(1);
+          } else {
+            const parts = input.split(' ');
+            commandName = parts[0];
+            args = parts.slice(1);
+          }
+          await processCommand(commandName, args);
+          return;
+        }
+
+        // Otherwise, treat as natural language chat input using OpenAI
+        await sendChatMessage(input);
+      }
+
+      // Function to send chat message to OpenAI
+      async function sendChatMessage(message) {
+        // Disable input and button during processing
+        quickChatInput.disabled = true;
+        sendChatButton.disabled = true;
+        chatStatusText.textContent = "Processing...";
+        chatStatusDot.className = "inline-block w-2 h-2 rounded-full bg-yellow-500 mr-1 animate-pulse";
+        
+        // Show typing indicator
+        const typingIndicator = document.createElement('div');
+        typingIndicator.className = 'chat-message';
+        typingIndicator.innerHTML = `
+          <div class="avatar ai-avatar">N</div>
+          <div class="message-content">
+            <div class="typing-indicator">
+              <span></span><span></span><span></span>
+            </div>
+          </div>
+        `;
+        terminalOutput.appendChild(typingIndicator);
+        terminalOutput.scrollTop = terminalOutput.scrollHeight;
+
+        try {
+          const responseText = await sendChatToOpenAI(message);
+          terminalOutput.removeChild(typingIndicator);
+          addChatMessage(responseText, 'ai');
+          
+          // Re-enable input and update status
+          quickChatInput.disabled = false;
+          sendChatButton.disabled = false;
+          updateChatStatus(true, "Ready to chat");
+          quickChatInput.focus();
+        } catch (error) {
+          try {
+            terminalOutput.removeChild(typingIndicator);
+          } catch (e) {}
+          addLogEntry(`Error: ${error.message}`, 'error');
+
+          if (error.message.includes("API key is not set")) {
+            addSystemMessage("Please enter your OpenAI API key in the configuration section above, then use the 'Test Connection' button to connect.");
+          } else if (error.message.includes("API is not connected")) {
+            addSystemMessage("Please test the OpenAI API connection using the 'Test Connection' button before sending messages.");
+          } else {
+            addChatMessage("I'm sorry, I encountered an error processing your request. Please check the API configuration and try again.", 'ai');
+          }
+          
+          // Re-enable input if API is still connected
+          if (system.apiStatus.connected) {
+            quickChatInput.disabled = false;
+            sendChatButton.disabled = false;
+            updateChatStatus(true, "Ready to chat");
+          } else {
+            updateChatStatus(false, "Connect API to chat");
+          }
+        }
+      }
+
+      async function processCommand(command, args) {
+        switch (command.toLowerCase()) {
+          case 'help':
+            showHelpCommand();
+            break;
+          case 'system:status':
+          case 'status':
+            showSystemStatus();
+            break;
+          case 'system:update':
+          case 'update':
+            addLogEntry('Checking for updates...', 'system');
+            await updateSystem();
+            break;
+          case 'system:info':
+          case 'info':
+            showSystemInfo();
+            break;
+          case 'system:history':
+          case 'history':
+            showUpdateHistory();
+            break;
+          case 'clear':
+            clearTerminal();
+            break;
+          case 'fs:list':
+          case 'ls':
+            listFiles();
+            break;
+          case 'fs:cd':
+            changeDirectory(args[0]);
+            break;
+          case 'fs:cat':
+            showFileContent(args[0]);
+            break;
+          case 'fs:edit':
+            editFile(args[0]);
+            break;
+          case 'fs:mkdir':
+            createDirectory(args[0]);
+            break;
+          case 'fs:touch':
+            createFile(args[0]);
+            break;
+          case 'fs:rm':
+            removeFile(args[0]);
+            break;
+          case 'process:list':
+          case 'ps':
+            listProcesses();
+            break;
+          case 'process:kill':
+            killProcessCommand(args[0]);
+            break;
+          case 'network:status':
+          case 'netstat':
+            showNetworkStatus();
+            break;
+          case 'ml:train':
+            addLogEntry('Starting neural model training...', 'ml');
+            await trainModels();
+            break;
+          case 'ml:status':
+            showMLStatus();
+            break;
+          case 'kernel:optimize':
+            optimizeKernel();
+            break;
+          case 'openai:test':
+            await testOpenAIConnection();
+            break;
+          case 'openai:chat':
+            if (args.length === 0) {
+              addLogEntry('Usage: openai:chat <message>', 'error');
+              break;
+            }
+            const message = args.join(' ');
+            addLogEntry(`Sending to OpenAI API: "${message}"`, 'system');
+            await sendChatMessage(message);
+            break;
+          default:
+            addLogEntry(`Unknown command: ${command}`, 'error');
+            addLogEntry('Type "help" for available commands.', 'info');
+        }
+      }
+
+      // === COMMAND IMPLEMENTATIONS ===
+      function showHelpCommand() {
+        addLogEntry('Available commands:', 'info');
+        system.commands.forEach(cmd => {
+          addLogEntry(`  <span class="text-white">${cmd.name}</span> - ${cmd.description}`, 'info');
+        });
+      }
+
+      function showSystemStatus() {
+        addLogEntry('=== SYSTEM STATUS ===', 'system');
+        addLogEntry(`Name: ${system.name}`, 'info');
+        addLogEntry(`Version: ${system.version} (${system.codename})`, 'info');
+        addLogEntry(`Uptime: ${getUptime()}`, 'info');
+        addLogEntry(`CPU Usage: ${cpuUsageValue.textContent}`, 'info');
+        addLogEntry(`Memory Usage: ${memoryUsageValue.textContent}`, 'info');
+        addLogEntry(`Active Processes: ${processes.filter(p => p.status === 'running').length}`, 'info');
+
+        // Add OpenAI API status
+        if (system.apiStatus.connected) {
+          addLogEntry(`OpenAI API: Connected (${system.apiStatus.model})`, 'success');
+          if (system.apiStatus.lastTested) {
+            addLogEntry(`Last API test: ${system.apiStatus.lastTested.toLocaleTimeString()}`, 'info');
+          }
+        } else {
+          addLogEntry('OpenAI API: Not connected', 'warning');
+          addLogEntry('Use "openai:test" to test the connection', 'info');
+        }
+
+        // Add neural network training status
+        if (system.trainingInProgress) {
+          addLogEntry('Neural Network: Training in progress', 'warning');
+        } else {
+          addLogEntry('Neural Network: Ready', 'success');
+        }
+
+        addLogEntry('', 'info');
+        addLogEntry('Type <span class="text-white">system:info</span> for more detailed information.', 'info');
+      }
+
+      function showSystemInfo() {
+        addLogEntry('=== SYSTEM INFORMATION ===', 'system');
+        addLogEntry(`${system.name} version ${system.version} "${system.codename}"`, 'info');
+        addLogEntry(`Kernel: v${system.kernelVersion}`, 'info');
+        addLogEntry(`Logic Engine: v${system.logicVersion}`, 'info');
+        addLogEntry(`Response Generator: v${system.responseVersion}`, 'info');
+        addLogEntry(`Self-Modification Module: v${system.selfModVersion}`, 'info');
+        addLogEntry('', 'info');
+        addLogEntry('Core Capabilities:', 'info');
+        system.capabilities.forEach(cap => {
+          addLogEntry(`  - ${cap}`, 'info');
+        });
+        addLogEntry('', 'info');
+        addLogEntry(`Boot Time: ${system.bootTime.toLocaleString()}`, 'info');
+        addLogEntry(`Last Update: ${formatDate(system.lastUpdate)}`, 'info');
+        addLogEntry(`Uptime: ${getUptime()}`, 'info');
+      }
+
+      function showUpdateHistory() {
+        addLogEntry('=== UPDATE HISTORY ===', 'system');
+        system.updateHistory.forEach(update => {
+          addLogEntry(`Version ${update.version} (${update.date}):`, 'info');
+          update.changes.forEach(change => {
+            addLogEntry(`  - ${change}`, 'info');
+          });
+          addLogEntry('', 'info');
+        });
+      }
+
+      function listFiles() {
+        const currentDir = getDirectoryByPath(system.currentDirectory);
+        if (!currentDir) {
+          addLogEntry(`Error: Cannot access directory ${system.currentDirectory}`, 'error');
+          return;
+        }
+
+        addLogEntry(`Directory listing for ${system.currentDirectory}:`, 'fs');
+
+        // Add folders first
+        currentDir.filter(item => item.type === 'folder').forEach(folder => {
+          addLogEntry(`  <span class="folder">📁 ${folder.name}/</span>`, 'fs');
+        });
+
+        // Then add files
+        currentDir.filter(item => item.type === 'file').forEach(file => {
+          addLogEntry(`  <span class="file">📄 ${file.name}</span>`, 'fs');
+        });
+
+        addLogEntry(`${currentDir.length} items total`, 'fs');
+      }
+
+      function changeDirectory(path) {
+        if (!path) {
+          addLogEntry(`Current directory: ${system.currentDirectory}`, 'fs');
+          return;
+        }
+
+        let newPath;
+        if (path.startsWith('/')) {
+          newPath = path;
+        } else if (path === '..') {
+          newPath = getParentDirectory(system.currentDirectory);
+        } else {
+          newPath = system.currentDirectory === '/' ? 
+            `/${path}` : `${system.currentDirectory}/${path}`;
+        }
+
+        // Check if directory exists
+        const dir = getDirectoryByPath(newPath);
+        if (!dir) {
+          addLogEntry(`Error: Directory not found: ${newPath}`, 'error');
+          return;
+        }
+
+        system.currentDirectory = newPath;
+        addLogEntry(`Changed directory to: ${system.currentDirectory}`, 'fs');
+        updateFileExplorer();
+      }
+
+      function showFileContent(filename) {
+        if (!filename) {
+          addLogEntry('Usage: fs:cat <filename>', 'error');
+          return;
+        }
+
+        const path = filename.startsWith('/') ? 
+          filename : 
+          system.currentDirectory === '/' ? 
+            `/${filename}` : `${system.currentDirectory}/${filename}`;
+
+        const file = findFileByPath(path);
+        if (!file || file.type !== 'file') {
+          addLogEntry(`Error: File not found: ${path}`, 'error');
+          return;
+        }
+
+        addLogEntry(`File: ${path}`, 'fs');
+        addLogEntry('Content:', 'fs');
+        addLogEntry(`<pre>${file.content}</pre>`, 'info');
+      }
+
+      function editFile(filename) {
+        if (!filename) {
+          addLogEntry('Usage: fs:edit <filename>', 'error');
+          return;
+        }
+
+        const path = filename.startsWith('/') ? 
+          filename : 
+          system.currentDirectory === '/' ? 
+            `/${filename}` : `${system.currentDirectory}/${filename}`;
+
+        const file = findFileByPath(path);
+        if (!file || file.type !== 'file') {
+          addLogEntry(`Error: File not found: ${path}`, 'error');
+          return;
+        }
+
+        addLogEntry(`Editing file: ${path}`, 'fs');
+
+        // Open the file editor
+        fileEditor.style.display = 'block';
+        editorFilename.textContent = filename;
+        fileEditorContent.value = file.content;
+        fileEditor.setAttribute('data-path', path);
+
+        // Switch to file system tab
+        tabs.forEach(t => t.classList.remove('active'));
+        tabContents.forEach(c => c.classList.remove('active'));
+        const fileSystemTab = document.querySelector('.tab[data-tab="filesystem"]');
+        fileSystemTab.classList.add('active');
+        document.getElementById('filesystem-tab').classList.add('active');
+      }
+
+      function createDirectory(name) {
+        if (!name) {
+          addLogEntry('Usage: fs:mkdir <name>', 'error');
+          return;
+        }
+
+        const currentDir = getDirectoryByPath(system.currentDirectory);
+        if (!currentDir) {
+          addLogEntry(`Error: Cannot access directory ${system.currentDirectory}`, 'error');
+          return;
+        }
+
+        // Check if already exists
+        if (currentDir.find(item => item.name === name)) {
+          addLogEntry(`Error: ${name} already exists`, 'error');
+          return;
+        }
+
+        // Create the directory
+        const newPath = system.currentDirectory === '/' ? 
+          `/${name}` : `${system.currentDirectory}/${name}`;
+
+        currentDir.push({
+          name: name,
+          type: 'folder',
+          path: newPath,
+          children: []
+        });
+
+        addLogEntry(`Directory created: ${name}`, 'success');
+        updateFileExplorer();
+      }
+
+      function createFile(name) {
+        if (!name) {
+          addLogEntry('Usage: fs:touch <name>', 'error');
+          return;
+        }
+
+        const currentDir = getDirectoryByPath(system.currentDirectory);
+        if (!currentDir) {
+          addLogEntry(`Error: Cannot access directory ${system.currentDirectory}`, 'error');
+          return;
+        }
+
+        // Check if already exists
+        if (currentDir.find(item => item.name === name)) {
+          addLogEntry(`Error: ${name} already exists`, 'error');
+          return;
+        }
+
+        // Create the file
+        currentDir.push({
+          name: name,
+          type: 'file',
+          content: ''
+        });
+
+        addLogEntry(`File created: ${name}`, 'success');
+        updateFileExplorer();
+      }
+
+      function removeFile(path) {
+        if (!path) {
+          addLogEntry('Usage: fs:rm <path>', 'error');
+          return;
+        }
+
+        const fullPath = path.startsWith('/') ? 
+          path : 
+          system.currentDirectory === '/' ? 
+            `/${path}` : `${system.currentDirectory}/${path}`;
+
+        const parentPath = getParentDirectory(fullPath);
+        const fileName = fullPath.split('/').pop();
+
+        const parentDir = getDirectoryByPath(parentPath);
+        if (!parentDir) {
+          addLogEntry(`Error: Parent directory not found: ${parentPath}`, 'error');
+          return;
+        }
+
+        const index = parentDir.findIndex(item => item.name === fileName);
+        if (index === -1) {
+          addLogEntry(`Error: File or directory not found: ${fullPath}`, 'error');
+          return;
+        }
+
+        // Remove the file or directory
+        parentDir.splice(index, 1);
+        addLogEntry(`Removed: ${fullPath}`, 'success');
+        updateFileExplorer();
+      }
+
+      function listProcesses() {
+        addLogEntry('=== RUNNING PROCESSES ===', 'process');
+
+        processes.forEach(proc => {
+          const status = proc.status === 'running' ? 
+            '<span class="process-running">●</span> running' : 
+            '<span class="process-suspended">●</span> idle';
+
+          addLogEntry(`[${proc.pid}] ${proc.name} - ${status} (CPU: ${proc.cpu}, MEM: ${proc.memory})`, 'process');
+        });
+      }
+
+      function killProcessCommand(pidStr) {
+        if (!pidStr) {
+          addLogEntry('Usage: process:kill <pid>', 'error');
+          return;
+        }
+
+        const pid = parseInt(pidStr);
+        if (isNaN(pid)) {
+          addLogEntry(`Error: Invalid PID: ${pidStr}`, 'error');
+          return;
+        }
+
+        const procIndex = processes.findIndex(p => p.pid === pid);
+        if (procIndex === -1) {
+          addLogEntry(`Error: Process not found with PID: ${pid}`, 'error');
+          return;
+        }
+
+        if (pid === 1) {
+          addLogEntry('Error: Cannot kill system-core process (PID 1)', 'error');
+          return;
+        }
+
+        // Kill the process
+        const proc = processes[procIndex];
+        processes.splice(procIndex, 1);
+
+        addLogEntry(`Process ${pid} (${proc.name}) terminated`, 'success');
+        updateProcessList();
+      }
+
+      function showNetworkStatus() {
+        addLogEntry('=== NETWORK STATUS ===', 'system');
+
+        // Display connection to OpenAI API
+        const openaiConnection = networkConnections.find(conn => conn.destination === "api.openai.com");
+        if (openaiConnection) {
+          const status = openaiConnection.status === 'active' ? 
+            '<span class="process-running">●</span> active' : 
+            '<span class="process-suspended">●</span> pending';
+
+          addLogEntry(`API Connection: ${status}`, 'info');
+
+          if (system.apiStatus.connected) {
+            addLogEntry(`  Endpoint: api.openai.com`, 'info');
+            addLogEntry(`  Model: ${system.apiStatus.model}`, 'info');
+            if (system.apiStatus.lastTested) {
+              addLogEntry(`  Last verified: ${system.apiStatus.lastTested.toLocaleTimeString()}`, 'info');
+            }
+          } else {
+            addLogEntry('  API key not configured or connection not tested', 'warning');
+            addLogEntry('  Use "openai:test" to test the connection', 'info');
+          }
+        }
+
+        // Display other connections
+        addLogEntry('Active Network Connections:', 'info');
+        networkConnections.forEach(conn => {
+          const status = conn.status === 'active' ? 
+            '<span class="process-running">●</span> active' : 
+            conn.status === 'idle' ? 
+              '<span class="process-suspended">●</span> idle' : 
+              '<span class="process-suspended">●</span> pending';
+
+          addLogEntry(`[${conn.id}] ${conn.type}: ${conn.source} → ${conn.destination} ${status}`, 'info');
+        });
+
+        // Display network stats
+        addLogEntry('Network Statistics:', 'info');
+        addLogEntry(`  Connections: ${connectionsStatElement.textContent}`, 'info');
+        addLogEntry(`  Bandwidth: ${bandwidthStatElement.textContent}`, 'info');
+        addLogEntry(`  Latency: ${latencyStatElement.textContent}`, 'info');
+        addLogEntry(`  Packets/sec: ${packetsStatElement.textContent}`, 'info');
+      }
+
+      function showMLStatus() {
+        addLogEntry('=== NEURAL CORE STATUS ===', 'ml');
+
+        const trainingStatus = system.trainingInProgress ? 
+          '<span class="process-running">●</span> Training in progress' : 
+          '<span class="process-running">●</span> Ready';
+
+        addLogEntry(`Training Status: ${trainingStatus}`, 'ml');
+
+        Object.entries(neuralModels).forEach(([key, model]) => {
+          const modelStatus = model.trainingStatus === 'training' ? 
+            '<span class="process-running">●</span> training' : 
+            '<span class="process-running">●</span> ready';
+
+          addLogEntry(`${model.name} v${model.version}: ${modelStatus}`, 'ml');
+          addLogEntry(`  Accuracy: ${model.accuracy.toFixed(1)}%`, 'ml');
+          addLogEntry(`  Latency: ${model.latency}ms`, 'ml');
+          addLogEntry(`  Performance: ${model.tokensPerSecond.toLocaleString()} tokens/sec`, 'ml');
+          addLogEntry(`  Last Training: ${formatDate(model.lastTraining)}`, 'ml');
+          addLogEntry('', 'ml');
+        });
+      }
+
+      // === FILE EXPLORER FUNCTIONS ===
+      function updateFileExplorer() {
+        const currentDir = getDirectoryByPath(system.currentDirectory);
+        if (!currentDir) return;
+
+        // Update breadcrumb
+        updateBreadcrumb();
+
+        // Clear current content
+        fileExplorerContent.innerHTML = '';
+
+        // Add parent directory if not at root
+        if (system.currentDirectory !== '/') {
+          const parentDir = document.createElement('div');
+          parentDir.className = 'file-item';
+          parentDir.innerHTML = `
+            <div class="file-icon folder">📁</div>
+            <div class="file-name">..</div>
+            <div class="file-meta"></div>
+          `;
+          parentDir.addEventListener('click', () => {
+            system.currentDirectory = getParentDirectory(system.currentDirectory);
+            updateFileExplorer();
+          });
+          fileExplorerContent.appendChild(parentDir);
+        }
+
+        // Add folders first
+        currentDir.filter(item => item.type === 'folder').forEach(folder => {
+          const folderEl = document.createElement('div');
+          folderEl.className = 'file-item';
+          folderEl.innerHTML = `
+            <div class="file-icon folder">📁</div>
+            <div class="file-name">${folder.name}</div>
+            <div class="file-meta">folder</div>
+          `;
+          folderEl.addEventListener('click', () => {
+            system.currentDirectory = system.currentDirectory === '/' ? 
+              `/${folder.name}` : `${system.currentDirectory}/${folder.name}`;
+            updateFileExplorer();
+          });
+          fileExplorerContent.appendChild(folderEl);
+        });
+
+        // Then add files
+        currentDir.filter(item => item.type === 'file').forEach(file => {
+          const fileEl = document.createElement('div');
+          fileEl.className = 'file-item';
+
+          let fileIcon = '📄';
+          let fileClass = 'file';
+
+          if (file.name.endsWith('.json')) {
+            fileIcon = '📊';
+            fileClass = 'data-file';
+          } else if (file.name.endsWith('.nx')) {
+            fileIcon = '⚙️';
+            fileClass = 'system-file';
+          } else if (file.name.endsWith('.log') || file.name.endsWith('.md')) {
+            fileIcon = '📝';
+            fileClass = 'text-file';
+          }
+
+          fileEl.innerHTML = `
+            <div class="file-icon ${fileClass}">${fileIcon}</div>
+            <div class="file-name">${file.name}</div>
+            <div class="file-meta">file</div>
+          `;
+          fileEl.addEventListener('click', () => {
+            openFile(file);
+          });
+          fileExplorerContent.appendChild(fileEl);
+        });
+      }
+
+      function updateBreadcrumb() {
+        // Clear current breadcrumb
+        fileBreadcrumb.innerHTML = '';
+
+        // Add root
+        const rootLink = document.createElement('a');
+        rootLink.textContent = 'root';
+        rootLink.addEventListener('click', () => {
+          system.currentDirectory = '/';
+          updateFileExplorer();
+        });
+        fileBreadcrumb.appendChild(rootLink);
+
+        // Add path segments
+        if (system.currentDirectory !== '/') {
+          const parts = getPathParts(system.currentDirectory);
+          let currentPath = '';
+
+          parts.forEach((part, index) => {
+            fileBreadcrumb.appendChild(document.createTextNode(' / '));
+
+            currentPath += '/' + part;
+            const pathLink = document.createElement('a');
+            pathLink.textContent = part;
+            pathLink.dataset.path = currentPath;
+            pathLink.addEventListener('click', (e) => {
+              system.currentDirectory = e.target.dataset.path;
+              updateFileExplorer();
+            });
+            fileBreadcrumb.appendChild(pathLink);
+          });
+        }
+      }
+
+      function openFile(file) {
+        fileContentView.classList.remove('hidden');
+        fileContentView.innerHTML = `
+          <div class="flex justify-between items-center mb-2">
+            <h3 class="font-bold">${file.name}</h3>
+            <div>
+              <button class="edit-file-btn text-xs bg-blue-600 hover:bg-blue-700 text-white py-1 px-2 rounded">Edit</button>
+              <button class="close-file-btn text-xs bg-red-600 hover:bg-red-700 text-white py-1 px-2 rounded ml-2">Close</button>
+            </div>
+          </div>
+          <pre class="text-sm">${file.content}</pre>
+        `;
+
+        // Set up edit button
+        fileContentView.querySelector('.edit-file-btn').addEventListener('click', () => {
+          fileContentView.classList.add('hidden');
+          fileEditor.style.display = 'block';
+          editorFilename.textContent = file.name;
+          fileEditorContent.value = file.content;
+
+          const path = system.currentDirectory === '/' ? 
+            `/${file.name}` : `${system.currentDirectory}/${file.name}`;
+          fileEditor.setAttribute('data-path', path);
+        });
+
+        // Set up close button
+        fileContentView.querySelector('.close-file-btn').addEventListener('click', () => {
+          fileContentView.classList.add('hidden');
+        });
+      }
+
+      function saveFile() {
+        const path = fileEditor.getAttribute('data-path');
+        const content = fileEditorContent.value;
+
+        const file = findFileByPath(path);
+        if (file && file.type === 'file') {
+          file.content = content;
+
+          addLogEntry(`File saved: ${path}`, 'success');
+
+          // Close editor and update content view
+          fileEditor.style.display = 'none';
+          fileContentView.classList.remove('hidden');
+          fileContentView.querySelector('pre').textContent = content;
+        } else {
+          addLogEntry(`Error: Could not save file ${path}`, 'error');
+        }
+      }
+
+      function createNewFile(name, isFolder) {
+        const fileName = name || prompt(isFolder ? "Enter folder name:" : "Enter file name:");
+        if (!fileName) return;
+
+        const currentDir = getDirectoryByPath(system.currentDirectory);
+        if (!currentDir) {
+          addLogEntry(`Error: Cannot access directory ${system.currentDirectory}`, 'error');
+          return;
+        }
+
+        // Check if already exists
+        if (currentDir.find(item => item.name === fileName)) {
+          alert(`Error: ${fileName} already exists`);
+          return;
+        }
+
+        // Create file or folder
+        if (isFolder) {
+          const newPath = system.currentDirectory === '/' ? 
+            `/${fileName}` : `${system.currentDirectory}/${fileName}`;
+
+          currentDir.push({
+            name: fileName,
+            type: 'folder',
+            path: newPath,
+            children: []
+          });
+          addLogEntry(`Directory created: ${fileName}`, 'success');
+        } else {
+          currentDir.push({
+            name: fileName,
+            type: 'file',
+            content: ''
+          });
+          addLogEntry(`File created: ${fileName}`, 'success');
+        }
+
+        updateFileExplorer();
+      }
+
+      // === PROCESS MANAGER FUNCTIONS ===
+      function updateProcessList() {
+        processListElement.innerHTML = '';
+
+        // Update some random process stats
+        processes.forEach(proc => {
+          if (proc.status === 'running') {
+            // Randomize CPU and memory usage slightly for visual effect
+            const cpuChange = Math.random() * 4 - 2; // -2 to +2
+            const memChange = Math.random() * 0.1 - 0.05; // -0.05 to +0.05
+
+            const cpuVal = parseFloat(proc.cpu) || 0;
+            proc.cpu = Math.max(0.1, Math.min(99, cpuVal + cpuChange)).toFixed(1) + '%';
+
+            const memVal = parseFloat(proc.memory) || 0;
+            if (proc.memory.includes('GB')) {
+              const gb = parseFloat(proc.memory);
+              proc.memory = Math.max(0.1, Math.min(8, gb + memChange)).toFixed(1) + 'GB';
+            } else if (proc.memory.includes('MB')) {
+              const mb = parseFloat(proc.memory);
+              proc.memory = Math.max(1, Math.min(4000, mb + memChange * 100)).toFixed(0) + 'MB';
+            }
+          }
+        });
+
+        // Update the DOM
+        processes.forEach(proc => {
+          const row = document.createElement('tr');
+
+          const statusClass = 
+            proc.status === 'running' ? 'process-running' : 
+            proc.status === 'suspended' ? 'process-suspended' : 
+            proc.status === 'error' ? 'process-critical' : '';
+
+          row.innerHTML = `
+            <td>${proc.pid}</td>
+            <td>${proc.name}</td>
+            <td><span class="${statusClass}">${proc.status}</span></td>
+            <td>${proc.cpu}</td>
+            <td>${proc.memory}</td>
+            <td>
+              ${proc.pid !== 1 ? `<button class="kill-process-btn text-xs bg-red-600 hover:bg-red-700 text-white py-0.5 px-2 rounded">Kill</button>` : ''}
+            </td>
+          `;
+
+          // Add kill button event listener
+          const killBtn = row.querySelector('.kill-process-btn');
+          if (killBtn) {
+            killBtn.addEventListener('click', () => {
+              killProcess(proc.pid);
+            });
+          }
+
+          processListElement.appendChild(row);
+        });
+
+        // Update system resource indicators
+        updateSystemResources();
+      }
+
+      function killProcess(pid) {
+        const index = processes.findIndex(p => p.pid === pid);
+        if (index === -1) return;
+
+        // Don't allow killing the system-core process
+        if (pid === 1) {
+          addLogEntry('Error: Cannot kill system-core process (PID 1)', 'error');
+          return;
+        }
+
+        const proc = processes[index];
+        processes.splice(index, 1);
+
+        addLogEntry(`Process ${pid} (${proc.name}) terminated`, 'success');
+        updateProcessList();
+      }
+
+      function updateSystemResources() {
+        // Calculate total CPU and memory usage from processes
+        let totalCpu = 0;
+        let totalMemory = 0;
+
+        processes.forEach(proc => {
+          if (proc.status === 'running') {
+            totalCpu += parseFloat(proc.cpu) || 0;
+
+            // Convert memory to MB for calculation
+            let memMB = 0;
+            if (proc.memory.includes('GB')) {
+              memMB = parseFloat(proc.memory) * 1024;
+            } else if (proc.memory.includes('MB')) {
+              memMB = parseFloat(proc.memory);
+            }
+            totalMemory += memMB;
+          }
+        });
+
+        // Cap total CPU at 100%
+        totalCpu = Math.min(100, totalCpu);
+
+        // Update UI
+        const cpuPercent = Math.round(totalCpu);
+        const memGB = (totalMemory / 1024).toFixed(1);
+
+        cpuUsageValue.textContent = `${cpuPercent}%`;
+        cpuUsageBar.style.width = `${cpuPercent}%`;
+
+        memoryUsageValue.textContent = `${memGB}GB / 8GB`;
+        memoryUsageBar.style.width = `${(parseFloat(memGB) / 8) * 100}%`;
+      }
+
+      // === NETWORK FUNCTIONS ===
+      function updateNetworkGraph() {
+        // Generate random network data
+        const data = generateRandomNetworkData();
+
+        // Create path
+        const width = networkGraph.clientWidth;
+        const height = networkGraph.clientHeight;
+
+        let path = '';
+        let areaPath = '';
+
+        data.forEach((point, index) => {
+          const x = (index / (data.length - 1)) * width;
+          const y = height - (point / 100) * height;
+
+          if (index === 0) {
+            path = `M ${x} ${y}`;
+            areaPath = `M ${x} ${height} L ${x} ${y}`;
+          } else {
+            path += ` L ${x} ${y}`;
+            areaPath += ` L ${x} ${y}`;
+          }
+        });
+
+        // Complete area path
+        areaPath += ` L ${width} ${height} Z`;
+
+        // Update SVG paths
+        const linePath = networkSvg.querySelector('.graph-line');
+        const areaFill = networkSvg.querySelector('.graph-area');
+
+        linePath.setAttribute('d', path);
+        areaFill.setAttribute('d', areaPath);
+
+        // Update network stats
+        updateNetworkStats();
+        updateNetworkConnections();
+      }
+
+      function updateNetworkStats() {
+        // Generate random network stats
+        const connections = getRandomInt(800, 1200);
+        const bandwidth = (Math.random() * 5 + 2).toFixed(1);
+        const latency = getRandomInt(5, 25);
+        const packets = getRandomInt(80, 150);
+
+        // Update UI
+        connectionsStatElement.textContent = connections.toLocaleString();
+        bandwidthStatElement.textContent = `${bandwidth} GB/s`;
+        latencyStatElement.textContent = `${latency}ms`;
+        packetsStatElement.textContent = `${packets}K/s`;
+      }
+
+      function updateNetworkConnections() {
+        // Update the network connections table
+        connectionsListElement.innerHTML = '';
+
+        networkConnections.forEach(conn => {
+          const row = document.createElement('tr');
+
+          const statusClass = 
+            conn.status === 'active' ? 'process-running' : 
+            conn.status === 'idle' ? 'process-suspended' : 
+            'process-suspended';
+
+          row.innerHTML = `
+            <td>${conn.id}</td>
+            <td>${conn.type}</td>
+            <td>${conn.source}</td>
+            <td>${conn.destination}</td>
+            <td><span class="${statusClass}">${conn.status}</span></td>
+          `;
+
+          connectionsListElement.appendChild(row);
+        });
+      }
+
+      // === MACHINE LEARNING FUNCTIONS ===
+      async function trainModels() {
+        try {
+          if (system.trainingInProgress) {
+            addLogEntry("Error: Training already in progress", "error");
+            return;
+          }
+
+          // Set system training flag
+          system.trainingInProgress = true;
+
+          // Set training status
+          trainingStatusElement.textContent = 'Training';
+          trainingStatusElement.className = 'text-sm text-yellow-500';
+
+          addLogEntry('Initializing neural model training...', 'ml');
+
+          // Reset progress bar
+          trainingProgressBar.style.width = '0%';
+
+          // Update model status to training
+          Object.values(neuralModels).forEach(model => {
+            model.trainingStatus = 'training';
+          });
+
+          // Add a training process
+          const trainingPid = getRandomInt(200, 999);
+          processes.push({
+            pid: trainingPid,
+            name: "neural-trainer",
+            status: "running",
+            cpu: "85.3%",
+            memory: "3.2GB",
+            startTime: new Date()
+          });
+          updateProcessList();
+
+          // Simulate training progress
+          for (let progress = 0; progress <= 100; progress += 5) {
+            trainingProgressBar.style.width = `${progress}%`;
+
+            if (progress === 20) {
+              addLogEntry('Training language models...', 'ml');
+            } else if (progress === 40) {
+              addLogEntry('Training vision models...', 'ml');
+            } else if (progress === 60) {
+              addLogEntry('Training reasoning models...', 'ml');
+            } else if (progress === 80) {
+              addLogEntry('Training generative models...', 'ml');
+            }
+
+            await sleep(300);
+          }
+
+          // Update models
+          Object.values(neuralModels).forEach(model => {
+            model.lastTraining = new Date();
+            model.trainingStatus = 'ready';
+            model.accuracy = Math.min(99.9, model.accuracy + Math.random() * 0.5);
+            model.latency = Math.max(5, model.latency - Math.random() * 2);
+            model.tokensPerSecond = Math.min(9999, model.tokensPerSecond + getRandomInt(50, 100));
+          });
+
+          // Update metrics display
+          const activeModel = document.querySelector('.model-option.active');
+          if (activeModel) {
+            const modelType = activeModel.getAttribute('data-model');
+            const model = neuralModels[modelType];
+            accuracyMetric.textContent = model.accuracy.toFixed(1) + '%';
+            latencyMetric.textContent = model.latency + 'ms';
+            tokensMetric.textContent = model.tokensPerSecond.toLocaleString();
+          }
+
+          // Update improvements list
+          improvementsListElement.innerHTML = `
+            <li>Context window expanded to 1M tokens</li>
+            <li>Reasoning accuracy improved by ${(Math.random() * 4).toFixed(1)}%</li>
+            <li>Response generation latency reduced by ${getRandomInt(15, 25)}%</li>
+            <li>Training completed at ${new Date().toLocaleTimeString()}</li>
+          `;
+
+          // Remove the training process
+          const procIndex = processes.findIndex(p => p.pid === trainingPid);
+          if (procIndex !== -1) {
+            processes.splice(procIndex, 1);
+          }
+          updateProcessList();
+
+          // Set training status to complete
+          trainingStatusElement.textContent = 'Ready';
+          trainingStatusElement.className = 'text-sm text-green-500';
+
+          addLogEntry('Neural model training complete!', 'success');
+          addSystemEvent("success", "Neural models optimized", "Just now");
+
+          // Reset system training flag
+          system.trainingInProgress = false;
+        } catch (error) {
+          // Handle errors
+          trainingStatusElement.textContent = 'Error';
+          trainingStatusElement.className = 'text-sm text-red-500';
+          addLogEntry(`Error during training: ${error.message}`, 'error');
+
+          // Reset model status
+          Object.values(neuralModels).forEach(model => {
+            model.trainingStatus = 'ready';
+          });
+
+          // Reset system training flag
+          system.trainingInProgress = false;
+        }
+      }
+
+      async function optimizeKernel() {
+        addLogEntry('Starting kernel optimization...', 'system');
+
+        // Simulate optimization steps
+        for (let i = 0; i < 5; i++) {
+          switch (i) {
+            case 0: addLogEntry('Analyzing system performance...', 'process'); break;
+            case 1: addLogEntry('Optimizing memory allocation...', 'process'); break;
+            case 2: addLogEntry('Tuning neural pathways...', 'process'); break;
+            case 3: addLogEntry('Adjusting response algorithms...', 'process'); break;
+            case 4: addLogEntry('Finalizing optimizations...', 'process'); break;
+          }
+          await sleep(800);
+        }
+
+        // Update system version
+        const minorVersion = parseInt(system.version.split('.')[2]) + 1;
+        system.version = `3.5.${minorVersion}`;
+        system.kernelVersion = system.version;
+        versionDisplay.textContent = `v${system.version}`;
+        versionInfo.textContent = `${system.version} (${system.codename})`;
+        kernelVersion.textContent = `v${system.version}`;
+
+        addLogEntry('Kernel optimization complete!', 'success');
+        addLogEntry(`System version updated to v${system.version}`, 'info');
+        addSystemEvent("success", "Kernel optimized", "Just now");
+      }
+
+      // === SYSTEM UPDATE & ERROR FUNCTIONS ===
+      async function updateSystem() {
+        // Simulate update check
+        await sleep(1500);
+
+        if (Math.random() > 0.3) { // 70% chance to find an update
+          const minorVersion = parseInt(system.version.split('.')[2]) + 1;
+          const newVersion = `3.5.${minorVersion}`;
+
+          addLogEntry(`Update found: v${newVersion}`, 'success');
+          addLogEntry('Starting update process...', 'system');
+
+          // Show update modal
+          updateModal.style.display = 'flex';
+          updateVersionElement.textContent = `v${newVersion}`;
+          updateLog.innerHTML = '';
+          updateProgressBarModal.style.width = '0%';
+          updateProgressText.textContent = '0%';
+          updateStepElement.textContent = 'Initializing';
+
+          // Add initial log entry
+          addUpdateLog('Initializing update process...');
+
+          // Simulate update progress
+          let progress = 0;
+          const updateInterval = setInterval(() => {
+            progress += Math.random() * 5 + 1;
+            if (progress > 100) progress = 100;
+
+            updateProgressBarModal.style.width = `${progress}%`;
+            updateProgressText.textContent = `${Math.floor(progress)}%`;
+
+            if (progress < 20) {
+              updateStepElement.textContent = 'Downloading components';
+              if (progress > 10 && updateLog.children.length < 2) {
+                addUpdateLog('Downloading system components...');
+              }
+            } else if (progress < 50) {
+              updateStepElement.textContent = 'Verifying integrity';
+              if (progress > 25 && updateLog.children.length < 3) {
+                addUpdateLog('Verifying file integrity...');
+              }
+            } else if (progress < 75) {
+              updateStepElement.textContent = 'Installing update';
+              if (progress > 55 && updateLog.children.length < 4) {
+                addUpdateLog(`Installing NexusOS v${newVersion}...`);
+              }
+            } else {
+              updateStepElement.textContent = 'Finalizing';
+              if (progress > 85 && updateLog.children.length < 5) {
+                addUpdateLog('Updating configuration files...');
+              }
+            }
+
+            if (progress >= 100) {
+              clearInterval(updateInterval);
+              addUpdateLog('Update completed successfully!');
+
+              setTimeout(() => {
+                // Hide update modal
+                updateModal.style.display = 'none';
+
+                // Update system version
+                system.version = newVersion;
+                system.kernelVersion = newVersion;
+                system.lastUpdate = new Date();
+
+                // Update version display
+                versionDisplay.textContent = `v${system.version}`;
+                versionInfo.textContent = `${system.version} (${system.codename})`;
+                kernelVersion.textContent = `v${system.version}`;
+                lastUpdatedElement.textContent = 'Just now';
+
+                // Add to update history
+                system.updateHistory.unshift({
+                  version: newVersion,
+                  date: 'Just now',
+                  changes: [
+                    'Improved system stability and performance',
+                    'Enhanced neural processing algorithms',
+                    'Added new security features',
+                    'Fixed various bugs and issues'
+                  ]
+                });
+
+                // Show success message
+                addLogEntry('Update completed successfully!', 'success');
+                addLogEntry(`System version updated to v${system.version}`, 'system');
+                addSystemEvent("success", `Updated to v${system.version}`, "Just now");
+              }, 1500);
+            }
+          }, 300);
+        } else {
+          addLogEntry('No updates available. System is up to date.', 'info');
+        }
+      }
+
+      function addUpdateLog(message) {
+        const log = document.createElement('div');
+        log.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+        updateLog.appendChild(log);
+        updateLog.scrollTop = updateLog.scrollHeight;
+      }
+
+      function showErrorScreen(message, code = 'NX-' + getRandomInt(100, 999)) {
+        errorMessage.textContent = message || 'A system error has occurred while processing your request.';
+        errorCode.textContent = `Error code: ${code}`;
+        errorSolution.textContent = 'Try refreshing the interface or check your system configuration.';
+        errorScreen.style.display = 'flex';
+      }
+
+      function showBlueScreen(message, code = '0x0000' + getRandomInt(1000, 9999).toString(16).toUpperCase()) {
+        bsodMessage.textContent = message || 'A critical system error has occurred that prevents normal operation.';
+        bsodCode.textContent = `STOP: ${code}`;
+        blueScreen.style.display = 'flex';
+      }
+
+      async function restoreSystem() {
+        // Hide error/blue screen
+        errorScreen.style.display = 'none';
+        blueScreen.style.display = 'none';
+
+        // Show rebooting message
+        addLogEntry('Initiating system restore...', 'system');
+
+        for (let i = 3; i > 0; i--) {
+          addLogEntry(`Restarting in ${i}...`, 'system');
+          await sleep(1000);
+        }
+
+        addLogEntry('System restarting...', 'system');
+
+        // Reload page
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500);
+      }
+
+      function addSystemEvent(type, message, time = 'Just now') {
+        // Add to system events array
+        system.systemEvents.unshift({
+          type: type,
+          message: message,
+          time: time
+        });
+
+        // Keep only the most recent events
+        system.systemEvents = system.systemEvents.slice(0, 10);
+
+        // Update UI
+        updateSystemEvents();
+      }
+
+      function updateSystemEvents() {
+        systemEventsElement.innerHTML = '';
+
+        system.systemEvents.forEach(event => {
+          const icon = event.type === 'success' ? 
+            '<span class="text-green-400">✓</span>' : 
+            event.type === 'warning' ? 
+              '<span class="text-yellow-400">!</span>' : 
+              '<span class="text-red-400">✕</span>';
+
+          const eventEl = document.createElement('p');
+          eventEl.innerHTML = `${icon} ${event.message} [${event.time}]`;
+          systemEventsElement.appendChild(eventEl);
+        });
+      }
+
+      function updateHistory() {
+        // Update the history in the system tab
+        system.updateHistory.forEach(update => {
+          const historyEl = document.createElement('div');
+          historyEl.className = 'version-update';
+          historyEl.innerHTML = `
+            <h4 class="font-bold">Version ${update.version} (${update.date})</h4>
+            <ul class="text-sm space-y-1 mt-1">
+              ${update.changes.map(change => `<li>• ${change}</li>`).join('')}
+            </ul>
+          `;
+        });
+      }
+
+      // === API KEY MANAGEMENT ===
+      function setupApiKeyManagement() {
+        // Toggle API key visibility
+        toggleApiVisibility.addEventListener('click', () => {
+          if (apiKeyInput.type === 'password') {
+            apiKeyInput.type = 'text';
+            toggleApiVisibility.innerHTML = `
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-5 h-5">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+              </svg>
+            `;
+          } else {
+            apiKeyInput.type = 'password';
+            toggleApiVisibility.innerHTML = `
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-5 h-5">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+            `;
+          }
+        });
+
+        // Test API connection button
+        testApiButton.addEventListener('click', testOpenAIConnection);
+
+        // Handle API key input change - reset connection status
+        apiKeyInput.addEventListener('input', () => {
+          if (system.apiStatus.connected) {
+            updateApiStatus(false, "API key changed - test connection");
+            updateChatStatus(false, "Connect API to chat");
+            system.apiStatus.connected = false;
+          }
+        });
+
+        // Handle model selection change
+        apiModelSelect.addEventListener('change', () => {
+          if (system.apiStatus.connected) {
+            system.apiStatus.model = apiModelSelect.value;
+          }
+        });
+
+        // Set up quick chat functionality
+        quickChatInput.addEventListener('keydown', async function(e) {
+          if (e.key === 'Enter') {
+            const message = quickChatInput.value.trim();
+            if (message) {
+              addChatMessage(message, 'user');
+              quickChatInput.value = '';
+              await sendChatMessage(message);
+            }
+          }
+        });
+
+        sendChatButton.addEventListener('click', async function() {
+          const message = quickChatInput.value.trim();
+          if (message) {
+            addChatMessage(message, 'user');
+            quickChatInput.value = '';
+            await sendChatMessage(message);
+          }
+        });
+      }
+
+      // === SYSTEM INITIALIZATION & BOOT SEQUENCE ===
+      function initializeSystem() {
+        // Set initial timestamps
+        lastUpdatedElement.textContent = formatDate(system.lastUpdate);
+
+        // Initialize file explorer
+        updateFileExplorer();
+
+        // Initialize process manager
+        updateProcessList();
+
+        // Initialize network display
+        updateNetworkGraph();
+
+        // Initialize OpenAI API elements
+        updateApiStatus(false, "API not connected");
+        updateChatStatus(false, "Connect API to chat");
+
+        // Initialize system events
+        updateSystemEvents();
+
+        // Initialize update history
+        updateHistory();
+
+        // Initialize neural network display
+        trainingStatusElement.textContent = 'Ready';
+        trainingStatusElement.className = 'text-sm text-green-500';
+
+        // Set up interval updates
+        updateCurrentTime();
+        setInterval(updateCurrentTime, 1000);
+        setInterval(updateProcessList, 10000);
+        setInterval(updateNetworkGraph, 8000);
+
+        // Terminal input handling
+        terminalInput.addEventListener('keydown', async function(e) {
+          if (e.key === 'Enter') {
+            const input = terminalInput.value.trim();
+            if (input === '') return;
+
+            terminalInput.value = '';
+
+            if (input.startsWith('/') || input.startsWith('system:') ||
+                input.startsWith('fs:') || input.startsWith('process:') ||
+                input.startsWith('network:') || input.startsWith('ml:') ||
+                input.startsWith('kernel:') || input.startsWith('openai:')) {
+              addLogEntry(`${currentPromptElement.textContent} ${input}`, 'user');
+            } else {
+              addChatMessage(input, 'user');
+            }
+
+            await processInput(input);
+          }
+        });
+
+        // Quick command buttons
+        document.querySelectorAll('.command-btn').forEach(btn => {
+          btn.addEventListener('click', async function() {
+            const command = this.getAttribute('data-command');
+            terminalInput.value = command;
+            terminalInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+          });
+        });
+
+        // Button event listeners
+        refreshNetworkBtn.addEventListener('click', updateNetworkGraph);
+        refreshProcessesBtn.addEventListener('click', updateProcessList);
+        trainModelBtn.addEventListener('click', trainModels);
+
+        // Model option selection
+        document.querySelectorAll('.model-option').forEach(option => {
+          option.addEventListener('click', function() {
+            document.querySelectorAll('.model-option').forEach(opt => opt.classList.remove('active'));
+            this.classList.add('active');
+
+            const modelType = this.getAttribute('data-model');
+            const model = neuralModels[modelType];
+
+            accuracyMetric.textContent = model.accuracy.toFixed(1) + '%';
+            latencyMetric.textContent = model.latency + 'ms';
+            tokensMetric.textContent = model.tokensPerSecond.toLocaleString();
+          });
+        });
+
+        // File system buttons
+        newFileBtn.addEventListener('click', () => createNewFile(null, false));
+        newFolderBtn.addEventListener('click', () => createNewFile(null, true));
+        saveFileBtn.addEventListener('click', saveFile);
+        cancelEditBtn.addEventListener('click', () => {
+          fileEditor.style.display = 'none';
+          fileContentView.classList.remove('hidden');
+        });
+
+        // Context panel toggle
+        contextToggle.addEventListener('click', function() {
+          contextBody.classList.toggle('hidden');
+          const chevron = contextToggle.querySelector('svg');
+          chevron.style.transform = contextBody.classList.contains('hidden') ? 'rotate(0deg)' : 'rotate(180deg)';
+        });
+
+        // System action buttons
+        if (updateSystemBtn) updateSystemBtn.addEventListener('click', updateSystem);
+        if (upgradeBtn) upgradeBtn.addEventListener('click', trainModels);
+        if (optimizeBtn) optimizeBtn.addEventListener('click', optimizeKernel);
+        if (backupBtn) {
+          backupBtn.addEventListener('click', async function() {
+            addLogEntry('Starting system backup...', 'system');
+
+            for (let i = 0; i < 4; i++) {
+              switch (i) {
+                case 0: addLogEntry('Preparing backup storage...', 'process'); break;
+                case 1: addLogEntry('Backing up kernel data...', 'process'); break;
+                case 2: addLogEntry('Backing up neural models...', 'process'); break;
+                case 3: addLogEntry('Finalizing backup...', 'process'); break;
+              }
+              await sleep(800);
+            }
+
+            addLogEntry('System backup completed successfully!', 'success');
+            addSystemEvent("success", "System backup created", "Just now");
+          });
+        }
+
+        // Error recovery buttons
+        restoreBtn.addEventListener('click', restoreSystem);
+        rebootBtn.addEventListener('click', restoreSystem);
+
+        // API key management
+        setupApiKeyManagement();
+
+        // Dark/light mode detection
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          document.body.classList.add('dark');
+        }
+
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+          if (event.matches) {
+            document.body.classList.add('dark');
+          } else {
+            document.body.classList.remove('dark');
+          }
+        });
+
+        // Focus the terminal input
+        terminalInput.focus();
+
+        // Show context panel
+        contextBody.classList.remove('hidden');
+        const chevron = contextToggle.querySelector('svg');
+        chevron.style.transform = 'rotate(180deg)';
+      }
+
+      // === BOOT SEQUENCE ===
+      clearTerminal();
+
+      const asciiLogo = document.createElement('div');
+      asciiLogo.className = 'ascii-art';
+      asciiLogo.textContent = `
+ _   __                     ___    ____
+/ | / /__  _  ____  _______/   |  / __ \\
+/  |/ / _ \\| |/_/ / / / ___/ /| | / / / /
+/ /|  /  __/>  </ /_/ (__  ) ___ |/ /_/ / 
+/_/ |_/\\___/_/|_|\\__,_/____/_/  |_/_____/  
+    Advanced Generalized Intelligence
+`;
+      terminalOutput.appendChild(asciiLogo);
+
+      // Boot sequence with delays
+      setTimeout(() => { addLogEntry('System initialization...', 'system'); }, 500);
+      setTimeout(() => { addLogEntry('Loading kernel modules... <span class="text-white">OK</span>', 'system'); }, 1000);
+      setTimeout(() => { addLogEntry('Initializing neural pathways... <span class="text-white">OK</span>', 'system'); }, 1500);
+      setTimeout(() => { addLogEntry('Activating knowledge base... <span class="text-white">OK</span>', 'system'); }, 2000);
+      setTimeout(() => { addLogEntry('Launching cognitive engine... <span class="text-white">OK</span>', 'system'); }, 2500);
+      setTimeout(() => { addSystemMessage(`System ready. Welcome to ${system.name} v${system.version}.`); }, 3000);
+
+      setTimeout(() => {
+        initializeSystem();
+
+        const typingIndicator = document.createElement('div');
+        typingIndicator.className = 'chat-message';
+        typingIndicator.innerHTML = `
+          <div class="avatar ai-avatar">N</div>
+          <div class="message-content">
+            <div class="typing-indicator">
+              <span></span><span></span><span></span>
+            </div>
+          </div>
+        `;
+        terminalOutput.appendChild(typingIndicator);
+        terminalOutput.scrollTop = terminalOutput.scrollHeight;
+
+        setTimeout(() => {
+          terminalOutput.removeChild(typingIndicator);
+          addChatMessage("Hello, I'm NexusAI. You're now interacting with my advanced simulation environment. Type commands starting with 'system:', 'fs:', 'process:', 'network:', or 'ml:' to explore my capabilities, or just chat naturally. Try 'help' for a list of available commands.", 'ai');
+          addSystemMessage("To use OpenAI integration, enter your API key in the configuration section above, then use the 'Test Connection' button.");
+        }, 1500);
+      }, 3500);
+    });
+  </script>
+</body>
+</html>

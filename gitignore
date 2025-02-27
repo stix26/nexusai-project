@@ -1,0 +1,12 @@
+# Ignore Mac system files
+.DS_Store
+
+# Node modules
+node_modules/
+
+# Python cache
+__pycache__/
+
+# Other files to ignore
+.env
+*.log
