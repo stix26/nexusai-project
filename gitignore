@@ -10,3 +10,5 @@ __pycache__/
 # Other files to ignore
 .env
 *.log
+nexus.db
+*.deb
