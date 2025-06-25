@@ -1,45 +1,79 @@
-# NexusAI Project
+# NexusAI - Advanced AGI System
 
-This project contains a single-page front‑end interface (`index.html`) and a lightweight backend written in Node.js. The backend exposes JSON APIs used by the front‑end and stores chat messages in a small SQLite database.
+A sophisticated AI interface that simulates an advanced AGI system with terminal-like interactions, file system operations, process monitoring, and chat capabilities.
 
-## Installation
+## 🎥 Video Demonstration
+
+Watch the NexusAI system in action: [Video Demonstration](https://drive.google.com/file/d/1cqYjeRyNtDUzOMbgO3Q7h84_Xv1RR5mP/view?usp=sharing)
+
+## 🚀 Features
+
+- **Terminal Interface**: Authentic terminal-like experience with command-line interactions
+- **File System Operations**: Browse, read, and manage files through the interface
+- **Process Monitoring**: Real-time system process information
+- **Network Statistics**: Network interface monitoring and statistics
+- **Chat System**: Interactive AI chat with message persistence
+- **System Information**: Comprehensive system statistics and monitoring
+- **Modern UI**: Beautiful, responsive interface with dark theme
+
+## 🛠️ Installation
 
 1. Clone the repository
    ```bash
    git clone <repository-url>
    cd nexusai-project
    ```
+
 2. Install dependencies
    ```bash
    npm install
    ```
 
-## Usage
+## 🎯 Usage
 
-Start the backend:
-```bash
-npm start
-```
-This launches an Express server on port `3000` with the following endpoints:
-- `POST /api/openai/test` – validate the provided API key (mock implementation)
-- `POST /api/chat` – store the chat message in the database and return an echo
-- `GET /api/files?path=.` – list files and folders
-- `GET /api/file?path=<file>` – read a file
-- `POST /api/file` – create or update a file `{ path, content }`
-- `GET /api/processes` – list running processes
-- `GET /api/network` – network interface information
-- `GET /api/system` – system statistics
+1. Start the backend server:
+   ```bash
+   npm start
+   ```
 
-The front‑end can be opened directly in the browser by opening `index.html`.
+2. Open your browser and navigate to:
+   ```
+   http://localhost:3000
+   ```
 
-## Tests
+The server runs on port `3000` and serves both the API endpoints and the front-end interface.
 
-Run the basic test suite with:
+## 📡 API Endpoints
+
+- `POST /api/openai/test` – Validate API key (mock implementation)
+- `POST /api/chat` – Store chat messages and return AI responses
+- `GET /api/files?path=.` – List files and folders in specified directory
+- `GET /api/file?path=<file>` – Read file contents
+- `POST /api/file` – Create or update files `{ path, content }`
+- `GET /api/processes` – List running system processes
+- `GET /api/network` – Network interface information
+- `GET /api/system` – System statistics and information
+
+## 🧪 Testing
+
+Run the test suite:
 ```bash
 npm test
 ```
-This starts the server and queries the `/api/system` endpoint to ensure it responds.
 
-## License
+This starts the server and queries the `/api/system` endpoint to ensure proper functionality.
+
+## 🏗️ Architecture
+
+- **Frontend**: Single-page application with modern UI components
+- **Backend**: Express.js server with RESTful API
+- **Database**: SQLite for message persistence
+- **Styling**: Tailwind CSS with custom terminal styling
+
+## 📝 License
 
 This project is licensed under the MIT License.
+
+## 🤝 Contributing
+
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.

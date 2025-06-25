@@ -10,6 +10,9 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 
+// Serve static files from the root directory
+app.use(express.static(__dirname));
+
 // simple sqlite db for messages
 const db = new sqlite3.Database(path.join(__dirname, 'nexus.db'));
 
@@ -105,6 +108,6 @@ app.get('/api/system', (req, res) => {
   });
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);
 });
